@@ -1,0 +1,288 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import type { Influencer } from "@/types/influencer"
+import { Check, Edit, Plus, X } from "lucide-react"
+
+interface ProfileDetailsProps {
+  influencer: Influencer
+  onUpdate: (updatedInfluencer: Influencer) => void
+}
+
+export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [formData, setFormData] = useState<Influencer>(influencer)
+  const [newCategory, setNewCategory] = useState("")
+  const [newBrand, setNewBrand] = useState("")
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "followers" || name === "rate" || name === "engagementRate" ? Number(value) : value,
+    }))
+  }
+
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !formData.categories.includes(newCategory.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        categories: [...prev.categories, newCategory.trim()],
+      }))
+      setNewCategory("")
+    }
+  }
+
+  const handleRemoveCategory = (category: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((c) => c !== category),
+    }))
+  }
+
+  const handleAddBrand = () => {
+    if (newBrand.trim() && !formData.brandsWorkedWith?.includes(newBrand.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        brandsWorkedWith: [...(prev.brandsWorkedWith || []), newBrand.trim()],
+      }))
+      setNewBrand("")
+    }
+  }
+
+  const handleRemoveBrand = (brand: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      brandsWorkedWith: prev.brandsWorkedWith?.filter((b) => b !== brand) || [],
+    }))
+  }
+
+  const handleSave = () => {
+    onUpdate(formData)
+    setIsEditing(false)
+  }
+
+  const handleCancel = () => {
+    setFormData(influencer)
+    setIsEditing(false)
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+          <CardTitle>Influencer Profile</CardTitle>
+          <CardDescription>View and edit influencer details</CardDescription>
+        </div>
+        {!isEditing ? (
+          <Button variant="outline" onClick={() => setIsEditing(true)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        ) : (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleCancel}>
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>
+              <Check className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="handle">Handle</Label>
+              {isEditing ? (
+                <Input id="handle" name="handle" value={formData.handle} onChange={handleInputChange} />
+              ) : (
+                <div className="text-lg font-medium">{influencer.handle}</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="profileLink">Profile Link</Label>
+              {isEditing ? (
+                <Input id="profileLink" name="profileLink" value={formData.profileLink} onChange={handleInputChange} />
+              ) : (
+                <a
+                  href={influencer.profileLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline break-all block"
+                >
+                  {influencer.profileLink}
+                </a>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email</Label>
+              {isEditing ? (
+                <Input id="email" name="email" type="email" value={formData.email || ""} onChange={handleInputChange} />
+              ) : (
+                <div>{influencer.email || "Not provided"}</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="platform">Platform</Label>
+              {isEditing ? (
+                <Input id="platform" name="platform" value={formData.platform} onChange={handleInputChange} />
+              ) : (
+                <div>{influencer.platform}</div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="followers">Followers</Label>
+              {isEditing ? (
+                <Input
+                  id="followers"
+                  name="followers"
+                  type="number"
+                  value={formData.followers}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <div>{influencer.followers.toLocaleString()}</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="rate">Rate ($)</Label>
+              {isEditing ? (
+                <Input id="rate" name="rate" type="number" value={formData.rate} onChange={handleInputChange} />
+              ) : (
+                <div>${influencer.rate.toLocaleString()}</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="engagementRate">Engagement Rate (%)</Label>
+              {isEditing ? (
+                <Input
+                  id="engagementRate"
+                  name="engagementRate"
+                  type="number"
+                  step="0.01"
+                  value={formData.engagementRate}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <div>{influencer.engagementRate}%</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="followersAge">Followers Age</Label>
+              {isEditing ? (
+                <Input
+                  id="followersAge"
+                  name="followersAge"
+                  value={formData.followersAge}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <div>{influencer.followersAge}</div>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="followersSex">Followers Gender</Label>
+              {isEditing ? (
+                <Input
+                  id="followersSex"
+                  name="followersSex"
+                  value={formData.followersSex}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <div>{influencer.followersSex}</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Label>Categories</Label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.categories.map((category, index) => (
+              <Badge key={index} variant="secondary" className="text-sm">
+                {category}
+                {isEditing && (
+                  <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleRemoveCategory(category)} />
+                )}
+              </Badge>
+            ))}
+
+            {isEditing && (
+              <div className="flex items-center gap-2 mt-2 w-full">
+                <Input
+                  placeholder="Add category..."
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleAddCategory()
+                    }
+                  }}
+                />
+                <Button variant="outline" size="sm" onClick={handleAddCategory}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <Label>Brands Worked With</Label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.brandsWorkedWith?.map((brand, index) => (
+              <Badge key={index} variant="outline" className="text-sm">
+                {brand}
+                {isEditing && <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleRemoveBrand(brand)} />}
+              </Badge>
+            ))}
+
+            {isEditing && (
+              <div className="flex items-center gap-2 mt-2 w-full">
+                <Input
+                  placeholder="Add brand..."
+                  value={newBrand}
+                  onChange={(e) => setNewBrand(e.target.value)}
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleAddBrand()
+                    }
+                  }}
+                />
+                <Button variant="outline" size="sm" onClick={handleAddBrand}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

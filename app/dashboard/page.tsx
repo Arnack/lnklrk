@@ -1,0 +1,90 @@
+"use client"
+
+import { useEffect, useState, useCallback } from "react"
+import { InfluencerTable } from "@/components/influencer-table"
+import { FilterBar } from "@/components/filter-bar"
+import { ImportExportButtons } from "@/components/import-export-buttons"
+import { initializeDatabase } from "@/lib/database"
+import type { Influencer } from "@/types/influencer"
+import { Loader2 } from "lucide-react"
+
+export default function DashboardPage() {
+  const [influencers, setInfluencers] = useState<Influencer[]>([])
+  const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true)
+      await initializeDatabase()
+
+      try {
+        const localForage = (await import("localforage")).default
+        const storedInfluencers = await localForage.getItem<Influencer[]>("influencers")
+
+        if (storedInfluencers) {
+          setInfluencers(storedInfluencers)
+          setFilteredInfluencers(storedInfluencers)
+        }
+      } catch (error) {
+        console.error("Failed to load influencers:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+    // Empty dependency array means this effect runs once on mount
+  }, [])
+
+  const handleFilterChange = useCallback((filtered: Influencer[]) => {
+    setFilteredInfluencers(filtered)
+  }, [])
+
+  const handleDataUpdate = (newInfluencers: Influencer[]) => {
+    setInfluencers(newInfluencers)
+    setFilteredInfluencers(newInfluencers)
+  }
+
+  const handleDeleteInfluencers = async (ids: string[]) => {
+    try {
+      const localForage = (await import("localforage")).default
+      const storedInfluencers = (await localForage.getItem<Influencer[]>("influencers")) || []
+
+      const updatedInfluencers = storedInfluencers.filter((inf) => !ids.includes(inf.id))
+
+      await localForage.setItem("influencers", updatedInfluencers)
+
+      // Update state
+      setInfluencers(updatedInfluencers)
+      setFilteredInfluencers((prev) => prev.filter((inf) => !ids.includes(inf.id)))
+    } catch (error) {
+      console.error("Failed to delete influencers:", error)
+      throw error
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Influencer Dashboard</h1>
+          <p className="text-muted-foreground">Manage your influencers and campaigns in one place</p>
+        </div>
+        <ImportExportButtons onDataUpdate={handleDataUpdate} />
+      </div>
+
+      <FilterBar influencers={influencers} onFilterChange={handleFilterChange} />
+
+      <InfluencerTable influencers={filteredInfluencers} onDelete={handleDeleteInfluencers} />
+    </div>
+  )
+}
