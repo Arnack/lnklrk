@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authenticateUser } from '@/lib/auth';
+import { authenticateUserRaw } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { sign } from 'jsonwebtoken';
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await authenticateUser(email, password);
+    const user = await authenticateUserRaw(email, password);
 
     if (!user) {
       return NextResponse.json(
