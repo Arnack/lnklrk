@@ -15,11 +15,13 @@ export const translations = {
     light: "Light",
     dark: "Dark",
     system: "System",
-    projectMate: "Project Mate",
-    byAvicom: "by Avicom",
-    streamline: "Streamline your project management experience",
+    chinnyCRM: "Chinny CRM",
+    byLinkLark: "by Link Lark",
+    streamline: "Created with ⌨️ and ❤️ by Greg",
     invalidCredentials: "Invalid email or password",
     loading: "Loading...",
+    login: "Login",
+    loginPlaceholder: "login",
   },
   zh: {
     welcome: "欢迎回来",
@@ -37,12 +39,13 @@ export const translations = {
     light: "亮",
     dark: "暗",
     system: "系统",
-    projectMate: "项目伙伴",
-    byAvicom: "由Avicom提供",
-    streamline: "简化您的项目管理体验",
+    chinnyCRM: "Chinny CRM",
+    byLinkLark: "by Link Lark",
+    streamline: "欧利以键盘为笔，以爱心为墨，倾心创作",
     invalidCredentials: "无效的电子邮件或密码",
     loading: "加载中...",
     login: "登录",
+    loginPlaceholder: "登录",
   }
 }
 

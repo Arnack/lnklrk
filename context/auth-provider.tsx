@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (credentials: { email: string; password: string }) => Promise<void>
+  login: (credentials: { login: string; password: string }) => Promise<void>
   logout: () => void
   refreshToken: () => Promise<boolean>
 }
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const login = async (credentials: { email: string; password: string }) => {
+  const login = async (credentials: { login: string; password: string }) => {
     try {
       const response = await AuthService.login(credentials)
       const { user: updatedUser } = LS.getUserInfo()

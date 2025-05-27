@@ -2,7 +2,7 @@ import axiosInstance from './axios.config';
 import LS from './LS';
 
 export interface LoginCredentials {
-  email: string;
+  login: string;
   password: string;
 }
 
@@ -22,11 +22,11 @@ export interface RefreshTokenResponse {
 
 export class AuthService {
   // TODO: move to env variable
-  private static readonly API_URL = 'https://dev.projectmate.ru/service/api/account/token';
+  private static readonly API_URL = '';
 
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const data = {
-      'UserName': credentials.email,
+      'UserName': credentials.login,
       'password': credentials.password,
       'grant_type': 'password',
       'client_type': 'WebProjectMate'

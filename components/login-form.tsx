@@ -17,8 +17,8 @@ import { toast } from "sonner"
 
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Пожалуйста, введите корректный email" }),
-  password: z.string().min(1, { message: "Пожалуйста, введите пароль" }),
+  login: z.string(),
+  password: z.string().min(1, { message: "Please enter a password" }),
 })
 
 export default function LoginForm() {
@@ -29,7 +29,7 @@ export default function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      login: "",
       password: "",
     },
   })
@@ -57,7 +57,7 @@ export default function LoginForm() {
 
       <div className="flex min-h-screen w-full">
         {/* Branding Column with Abstract Geometric Elements */}
-        <div className="hidden bg-primary lg:block lg:w-1/2 dark:bg-primary/20 relative overflow-hidden">
+        <div className="hidden bg-gray-900 lg:block lg:w-1/2 dark:bg-primary/20 relative overflow-hidden">
           {/* Abstract Geometric Background */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating circles */}
@@ -106,8 +106,8 @@ export default function LoginForm() {
           {/* Content */}
           <div className="relative flex h-full flex-col items-center justify-center px-8 text-white z-10">
             <div className="max-w-md text-center">
-              <h2 className="mb-2 text-3xl font-bold">{t("projectMate")}</h2>
-              <p className="mb-6">{t("byAvicom")}</p>
+              <h2 className="mb-2 text-3xl font-bold">{t("chinnyCRM")}</h2>
+              <p className="mb-6">{t("byLinkLark")}</p>
 
               {/* Abstract geometric composition */}
               <div className="mx-auto h-64 w-64 relative flex items-center justify-center">
@@ -233,14 +233,14 @@ export default function LoginForm() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="login"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("email")}</FormLabel>
+                      <FormLabel>{t("login")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="you@example.com" className="pl-10" {...field} />
+                          <Input placeholder={t("loginPlaceholder")} className="pl-10" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />

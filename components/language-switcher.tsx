@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
       "
     >
       <span className="text-gray-200 dark:text-gray-200 mix-blend-revert">
-        {language === "en" ? "EN" : "中文"}
+        {language === "en" ? "中文" : "EN"}
       </span>
     </Button>
   )
