@@ -128,33 +128,34 @@ export default function LoginForm() {
 
 
                   {/* Central dot */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-amber-400 rounded-full shadow-[0_0_20px_5px_rgba(251,191,36,0.7)] animate-pulse" style={{ animationDuration: "100s"}}></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-amber-400 rounded-full shadow-[0_0_20px_5px_rgba(251,191,36,0.7)] animate-pulse"
+                  style={{ animationDuration: "100s"}}></div>
 
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-amber-100/80 rounded-full"></div>
 
                   {/* Orbiting element */}
                   <div className="absolute w-32 h-32 animate-spin" style={{ animationDuration: "50s" }}>
                     <div
-                      className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-3 h-3 bg-emerald-800" />
+                      className="absolute  rounded-full w-4 h-4 bg-emerald-800"
+                      style={{
+                        transform: "translate(13px, 13px)",
+                      }}
+                      />
 
-                    <div className="absolute top-0 left-1/2  transform -translate-x-1/2 -translate-y-1/2 w-11 h-11 animate-spin border-1 rounded-full border-white/30"
-                      style={{ animationPlayState:"running",
-                        animationDuration: ".1s", 
+                    <div className="absolute w-11 h-11 border-1 rounded-full border-white/30"
+                      style={{
+                        animation: "spin 2s linear infinite", 
                         borderWidth: "1px",
-                        transform: "translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important"
                       }}>
                       <div className="absolute rounded-full top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-gray-500/80" />
                     </div>
                     
                   </div>
                   
-                  <div className="absolute bottom-0 right-0 w-44 h-44 transform translate-x-1/4 translate-y-1/4 animate-spin"
-                  style={{ animationPlayState:"running", animationDuration: "30s" }}>
-
-<div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-sky-500 animate-spin"
-                    style={{ animationDuration: ".1s", animationDirection: "reverse"}} />
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-500/80 animate-spin"
-                    style={{ animationDuration: ".1s", animationDirection: "reverse"}} />
+                  <div className="absolute bottom-0 right-0 w-44 h-44 transform translate-x-1/4 translate-y-1/4"
+                  style={{  animationDuration: "30s" }}>
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-sky-500 rounded-full" />
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-500/80 rounded-full" />
                   </div>
                 </div>
                 </div>
