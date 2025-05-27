@@ -137,13 +137,19 @@ export default function LoginForm() {
                     <div
                       className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-3 h-3 bg-emerald-800" />
 
-                    <div className="absolute top-0 left-1/2  transform -translate-x-1/2 -translate-y-1/2 w-11 h-11 animate-spin border-1 rounded-full border-white/30" style={{ animationDuration: "4s", backgroundColor: "#66000066" }}>
+                    <div className="absolute top-0 left-1/2  transform -translate-x-1/2 -translate-y-1/2 w-11 h-11 animate-spin border-1 rounded-full border-white/30"
+                      style={{ animationPlayState:"running",
+                        animationDuration: ".1s", 
+                        borderWidth: "1px",
+                        transform: "translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important"
+                      }}>
                       <div className="absolute rounded-full top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-gray-500/80" />
                     </div>
                     
                   </div>
                   
-                  <div className="absolute bottom-0 right-0 w-44 h-44 transform translate-x-1/4 translate-y-1/4 animate-spin" style={{ animationDuration: "30s" }}>
+                  <div className="absolute bottom-0 right-0 w-44 h-44 transform translate-x-1/4 translate-y-1/4 animate-spin"
+                  style={{ animationPlayState:"running", animationDuration: "30s" }}>
 
 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-sky-500 animate-spin"
                     style={{ animationDuration: ".1s", animationDirection: "reverse"}} />
