@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import { InfluencerTable } from "@/components/influencer-table"
 import { FilterBar } from "@/components/filter-bar"
 import { ImportExportButtons } from "@/components/import-export-buttons"
-import { initializeDatabase } from "@/lib/database"
+import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
 import type { Influencer } from "@/types/influencer"
 import { Loader2 } from "lucide-react"
 
@@ -16,16 +16,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
-      await initializeDatabase()
-
       try {
-        const localForage = (await import("localforage")).default
-        const storedInfluencers = await localForage.getItem<Influencer[]>("influencers")
-
-        if (storedInfluencers) {
-          setInfluencers(storedInfluencers)
-          setFilteredInfluencers(storedInfluencers)
-        }
+        const data = await fetchInfluencers()
+        setInfluencers(data)
+        setFilteredInfluencers(data)
       } catch (error) {
         console.error("Failed to load influencers:", error)
       } finally {
@@ -34,7 +28,6 @@ export default function DashboardPage() {
     }
 
     loadData()
-    // Empty dependency array means this effect runs once on mount
   }, [])
 
   const handleFilterChange = useCallback((filtered: Influencer[]) => {
@@ -48,16 +41,12 @@ export default function DashboardPage() {
 
   const handleDeleteInfluencers = async (ids: string[]) => {
     try {
-      const localForage = (await import("localforage")).default
-      const storedInfluencers = (await localForage.getItem<Influencer[]>("influencers")) || []
+      // Delete each influencer from the database
+      await Promise.all(ids.map(id => deleteInfluencer(id)))
 
-      const updatedInfluencers = storedInfluencers.filter((inf) => !ids.includes(inf.id))
-
-      await localForage.setItem("influencers", updatedInfluencers)
-
-      // Update state
-      setInfluencers(updatedInfluencers)
-      setFilteredInfluencers((prev) => prev.filter((inf) => !ids.includes(inf.id)))
+      // Update state to remove deleted influencers
+      setInfluencers(prev => prev.filter(inf => !ids.includes(inf.id)))
+      setFilteredInfluencers(prev => prev.filter(inf => !ids.includes(inf.id)))
     } catch (error) {
       console.error("Failed to delete influencers:", error)
       throw error

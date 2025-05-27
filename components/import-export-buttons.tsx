@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
+import { fetchInfluencers, createInfluencer } from "@/lib/api"
 import { Download, Upload, AlertCircle } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 
@@ -28,10 +29,8 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
 
   const handleExport = async () => {
     try {
-      const localForage = (await import("localforage")).default
       const XLSX = await import("xlsx")
-
-      const influencers = (await localForage.getItem<Influencer[]>("influencers")) || []
+      const influencers = await fetchInfluencers()
 
       // Prepare data for export
       const exportData = influencers.map((inf) => ({
@@ -71,8 +70,8 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
         return
       }
 
-      // Import the libraries dynamically
-      const [{ default: localForage }, XLSX] = await Promise.all([import("localforage"), import("xlsx")])
+      // Import XLSX library
+      const XLSX = await import("xlsx")
 
       // Read the Excel file
       const reader = new FileReader()
@@ -94,8 +93,7 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
           const jsonData = XLSX.utils.sheet_to_json(worksheet)
 
           // Transform to Influencer objects
-          const importedInfluencers: Influencer[] = jsonData.map((row: any) => ({
-            id: uuidv4(),
+          const importedInfluencers: Omit<Influencer, 'id'>[] = jsonData.map((row: any) => ({
             handle: row.Handle || "",
             profileLink: row["Profile Link"] || "",
             followers: Number(row.Followers) || 0,
@@ -115,45 +113,26 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
               : [],
           }))
 
-          // Get existing influencers
-          const existingInfluencers = (await localForage.getItem<Influencer[]>("influencers")) || []
+          // Get existing influencers to check for duplicates
+          const existingInfluencers = await fetchInfluencers()
+          const existingProfileLinks = new Set(existingInfluencers.map(inf => inf.profileLink))
 
-          // Remove duplicates based on profile link
-          const uniqueLinks = new Set()
-          const mergedInfluencers = [...existingInfluencers]
-
+          // Filter out duplicates and create new influencers
+          const newInfluencers = []
           for (const newInf of importedInfluencers) {
-            if (newInf.profileLink && !uniqueLinks.has(newInf.profileLink)) {
-              // Check if this profile link already exists
-              const existingIndex = mergedInfluencers.findIndex((inf) => inf.profileLink === newInf.profileLink)
-
-              if (existingIndex >= 0) {
-                // Update existing record
-                mergedInfluencers[existingIndex] = {
-                  ...mergedInfluencers[existingIndex],
-                  ...newInf,
-                  id: mergedInfluencers[existingIndex].id, // Keep original ID
-                  notes: [...(mergedInfluencers[existingIndex].notes || []), ...(newInf.notes || [])],
-                  files: [...(mergedInfluencers[existingIndex].files || [])],
-                  messages: [...(mergedInfluencers[existingIndex].messages || [])],
-                  campaigns: [...(mergedInfluencers[existingIndex].campaigns || [])],
-                }
-              } else {
-                // Add new record
-                mergedInfluencers.push(newInf)
-                uniqueLinks.add(newInf.profileLink)
+            if (!newInf.profileLink || !existingProfileLinks.has(newInf.profileLink)) {
+              try {
+                const created = await createInfluencer(newInf)
+                newInfluencers.push(created)
+              } catch (error) {
+                console.error("Failed to create influencer:", error)
               }
-            } else if (!newInf.profileLink) {
-              // No profile link, just add as new
-              mergedInfluencers.push(newInf)
             }
           }
 
-          // Save to localForage
-          await localForage.setItem("influencers", mergedInfluencers)
-
-          // Update UI
-          onDataUpdate(mergedInfluencers)
+          // Get updated list and update UI
+          const updatedInfluencers = await fetchInfluencers()
+          onDataUpdate(updatedInfluencers)
 
           // Reset file input
           event.target.value = ""

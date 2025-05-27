@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
+import { fetchInfluencer, updateInfluencer, deleteInfluencer } from "@/lib/api"
 import { ArrowLeft, Loader2, Trash2, AlertTriangle } from "lucide-react"
 
 export default function InfluencerPage({ params }: { params: { id: string } }) {
@@ -33,15 +34,8 @@ export default function InfluencerPage({ params }: { params: { id: string } }) {
     const loadInfluencer = async () => {
       setIsLoading(true)
       try {
-        const localForage = (await import("localforage")).default
-        const storedInfluencers = await localForage.getItem<Influencer[]>("influencers")
-
-        if (storedInfluencers) {
-          const found = storedInfluencers.find((inf) => inf.id === params.id)
-          if (found) {
-            setInfluencer(found)
-          }
-        }
+        const data = await fetchInfluencer(params.id)
+        setInfluencer(data)
       } catch (error) {
         console.error("Failed to load influencer:", error)
       } finally {
@@ -54,15 +48,8 @@ export default function InfluencerPage({ params }: { params: { id: string } }) {
 
   const handleProfileUpdate = async (updatedInfluencer: Influencer) => {
     try {
-      const localForage = (await import("localforage")).default
-      const storedInfluencers = (await localForage.getItem<Influencer[]>("influencers")) || []
-
-      const updatedInfluencers = storedInfluencers.map((inf) =>
-        inf.id === updatedInfluencer.id ? updatedInfluencer : inf,
-      )
-
-      await localForage.setItem("influencers", updatedInfluencers)
-      setInfluencer(updatedInfluencer)
+      const updated = await updateInfluencer(updatedInfluencer.id, updatedInfluencer)
+      setInfluencer(updated)
     } catch (error) {
       console.error("Failed to update influencer:", error)
     }
@@ -73,13 +60,7 @@ export default function InfluencerPage({ params }: { params: { id: string } }) {
     setDeleteError(null)
 
     try {
-      const localForage = (await import("localforage")).default
-      const storedInfluencers = (await localForage.getItem<Influencer[]>("influencers")) || []
-
-      const updatedInfluencers = storedInfluencers.filter((inf) => inf.id !== params.id)
-
-      await localForage.setItem("influencers", updatedInfluencers)
-
+      await deleteInfluencer(params.id)
       // Close dialog and redirect to dashboard
       setShowDeleteDialog(false)
       router.push("/dashboard")

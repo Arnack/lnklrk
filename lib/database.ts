@@ -4,6 +4,10 @@ import { db } from './db';
 import { influencers } from './schema';
 import { eq } from 'drizzle-orm';
 
+// Export types for use in other files
+export type DbInfluencer = typeof influencers.$inferInsert;
+export type DbInfluencerUpdate = Partial<DbInfluencer>;
+
 // Sample data for initial setup
 const sampleInfluencers: Influencer[] = [
   // {
@@ -88,9 +92,6 @@ export async function initializeDatabase() {
     console.error("Failed to initialize database:", error)
   }
 }
-
-type DbInfluencer = typeof influencers.$inferInsert;
-type DbInfluencerUpdate = Partial<DbInfluencer>;
 
 export async function getAllInfluencers() {
   try {

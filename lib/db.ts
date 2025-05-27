@@ -1,6 +1,11 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 
+// Ensure this code only runs on the server side
+if (typeof window !== 'undefined') {
+  throw new Error('This module can only be used on the server side');
+}
+
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
