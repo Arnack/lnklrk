@@ -12,14 +12,17 @@ import LS from "@/app/service/LS"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [isLogin, setIsLogin] = useState(true)
+  const [formMode, setFormMode] = useState<'login' | 'changePassword' | 'changeEmail'>('login')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    name: "",
+    newPassword: "",
+    confirmPassword: "",
+    newEmail: "",
+    currentPassword: "",
   })
   const router = useRouter()
 
@@ -33,10 +36,27 @@ export function LoginForm() {
     setError(null)
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register'
-      const body = isLogin 
-        ? { email: formData.email, password: formData.password }
-        : formData
+      let endpoint = '/api/auth/login'
+      let body: any = { email: formData.email, password: formData.password }
+
+      if (formMode === 'changePassword') {
+        if (formData.newPassword !== formData.confirmPassword) {
+          throw new Error('New passwords do not match')
+        }
+        endpoint = '/api/auth/change-password'
+        body = {
+          email: formData.email,
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        }
+      } else if (formMode === 'changeEmail') {
+        endpoint = '/api/auth/change-email'
+        body = {
+          currentEmail: formData.email,
+          newEmail: formData.newEmail,
+          password: formData.currentPassword
+        }
+      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -49,15 +69,30 @@ export function LoginForm() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed')
+        throw new Error(data.error || 'Operation failed')
       }
 
       console.log('>>>', data);
-      LS.setUserId(data?.user?.id);
-      // Redirect to dashboard on success
-      router.push('/dashboard')
+      
+      if (formMode === 'login') {
+        LS.setUserId(data?.user?.id);
+        router.push('/dashboard')
+      } else {
+        // Show success message for password/email changes
+        setError(null)
+        alert('Changes saved successfully!')
+        setFormMode('login')
+        setFormData({
+          email: formMode === 'changeEmail' ? formData.newEmail : formData.email,
+          password: "",
+          newPassword: "",
+          confirmPassword: "",
+          newEmail: "",
+          currentPassword: "",
+        })
+      }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Authentication failed')
+      setError(error instanceof Error ? error.message : 'Operation failed')
     } finally {
       setIsLoading(false)
     }
@@ -65,6 +100,36 @@ export function LoginForm() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const resetForm = () => {
+    setError(null)
+    setFormData({
+      email: "",
+      password: "",
+      newPassword: "",
+      confirmPassword: "",
+      newEmail: "",
+      currentPassword: "",
+    })
+  }
+
+  const getFormTitle = () => {
+    switch (formMode) {
+      case 'login': return 'WELCOME_BACK'
+      case 'changePassword': return 'CHANGE_PASSWORD'
+      case 'changeEmail': return 'CHANGE_EMAIL'
+      default: return 'WELCOME_BACK'
+    }
+  }
+
+  const getFormSubtitle = () => {
+    switch (formMode) {
+      case 'login': return 'Enter credentials to access dashboard'
+      case 'changePassword': return 'Update your account password'
+      case 'changeEmail': return 'Update your account email address'
+      default: return 'Enter credentials to access dashboard'
+    }
   }
 
   if (!mounted) return null
@@ -300,13 +365,10 @@ export function LoginForm() {
             <div className="text-center mb-8">
               
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-mono">
-                {isLogin ? 'WELCOME_BACK' : 'CREATE_ACCOUNT'}
+                {getFormTitle()}
               </h2>
               <p className="text-gray-600 dark:text-slate-400 text-sm font-light">
-                {isLogin 
-                  ? 'Enter credentials to access dashboard' 
-                  : 'Initialize new user profile'
-                }
+                {getFormSubtitle()}
               </p>
             </div>
 
@@ -319,67 +381,167 @@ export function LoginForm() {
               <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-600/50 dark:border-blue-400/50"></div>
               
               <form onSubmit={handleSubmit} className="space-y-5">
-                {!isLogin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                      Full Name
-                    </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
-                      required={!isLogin}
-                    />
-                  </div>
-                )}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="user@example.com"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
-                    required
-                  />
-                </div>
+                {formMode === 'login' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="user@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={formData.password}
-                      onChange={(e) => handleInputChange('password', e.target.value)}
-                      className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono pr-10"
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-11 px-3 hover:bg-transparent text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={formData.password}
+                          onChange={(e) => handleInputChange('password', e.target.value)}
+                          className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono pr-10"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-11 px-3 hover:bg-transparent text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {formMode === 'changePassword' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="user@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Current Password
+                      </Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.currentPassword}
+                        onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        New Password
+                      </Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.newPassword}
+                        onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Confirm Password
+                      </Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+
+                {formMode === 'changeEmail' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="currentEmail" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Current Email
+                      </Label>
+                      <Input
+                        id="currentEmail"
+                        type="email"
+                        placeholder="user@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="newEmail" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        New Email
+                      </Label>
+                      <Input
+                        id="newEmail"
+                        type="email"
+                        placeholder="newuser@example.com"
+                        value={formData.newEmail}
+                        onChange={(e) => handleInputChange('newEmail', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPasswordEmail" className="text-sm font-mono text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                        Password
+                      </Label>
+                      <Input
+                        id="currentPasswordEmail"
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.currentPassword}
+                        onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                        className="h-11 bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 rounded text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
 
                 {error && (
                   <Alert variant="destructive" className="border-red-300 dark:border-red-500/50 bg-red-50 dark:bg-red-500/10">
@@ -396,11 +558,11 @@ export function LoginForm() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {isLogin ? 'ACCESSING...' : 'INITIALIZING...'}
+                      {formMode === 'login' ? 'ACCESSING...' : formMode === 'changePassword' ? 'UPDATING...' : 'CHANGING...'}
                     </>
                   ) : (
                     <>
-                      {isLogin ? 'ACCESS_SYSTEM' : 'CREATE_PROFILE'}
+                      {formMode === 'login' ? 'ACCESS_SYSTEM' : formMode === 'changePassword' ? 'UPDATE_PASSWORD' : 'CHANGE_EMAIL'}
                     </>
                   )}
                 </Button>
@@ -411,16 +573,12 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => {
-                    setIsLogin(!isLogin)
-                    setError(null)
-                    setFormData({ email: "", password: "", name: "" })
+                    setFormMode(formMode === 'login' ? 'changePassword' : formMode === 'changePassword' ? 'changeEmail' : 'login')
+                    resetForm()
                   }}
                   className="text-sm font-mono text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 uppercase tracking-wider"
                 >
-                  {isLogin 
-                    ? "Need account? Create_Profile" 
-                    : "Have account? Access_System"
-                  }
+                  {formMode === 'login' ? 'CHANGE_PASSWORD' : formMode === 'changePassword' ? 'CHANGE_EMAIL' : 'LOGIN'}
                 </button>
               </div>
             </div>
