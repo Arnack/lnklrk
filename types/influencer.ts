@@ -2,6 +2,7 @@ export interface Influencer {
   id: string
   handle: string
   profileLink: string
+  profile_link: string
   followers: number
   email?: string
   rate: number
