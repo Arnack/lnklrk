@@ -163,7 +163,7 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
             </TableRow>
           </TableHeader>
           <TableBody>
-            <tr style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: "relative" }} />
+            <tr style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: "relative", marginTop: "0px" }} />
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const influencer = influencers[virtualRow.index]
               return (
@@ -172,6 +172,7 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                   className="absolute top-0 left-0 w-full cursor-pointer hover:bg-muted"
                   style={{
                     transform: `translateY(${virtualRow.start}px)`,
+                    marginTop: "48px",
                   }}
                   onClick={(e) => handleRowClick(influencer.id, e)}
                 >
