@@ -176,6 +176,11 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
             </DialogDescription>
           </DialogHeader>
 
+          {isImporting ?
+            <div className="grid gap-4 py-4"> 
+              Importing...
+            </div>
+          :
           <div className="grid gap-4 py-4">
             <input
               type="file"
@@ -195,13 +200,8 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
                 <AlertDescription>{importError}</AlertDescription>
               </Alert>
             )}
-          </div>
+          </div>}
 
-          <DialogFooter>
-            <Button variant="outline" disabled={isImporting}>
-              {isImporting ? "Importing..." : "Close"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
