@@ -205,11 +205,11 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className={columnWidths.engagement}>{influencer.engagementRate}%</TableCell>
+                  <TableCell className={columnWidths.engagement}>{influencer.engagement_rate}%</TableCell>
                   <TableCell className={columnWidths.demographics}>
                     <div className="text-xs">
-                      <div>{influencer.followersAge}</div>
-                      <div>{influencer.followersSex}</div>
+                      <div>{influencer.followers_age}</div>
+                      <div>{influencer.followers_sex}</div>
                     </div>
                   </TableCell>
                 </TableRow>

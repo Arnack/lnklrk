@@ -7,10 +7,14 @@ export interface Influencer {
   rate: number
   categories: string[]
   followersAge: string
+  followers_age: string
   followersSex: string
+  followers_sex: string
   engagementRate: number
+  engagement_rate: number
   platform: string
   brandsWorkedWith?: string[]
+  brands_worked_with?: string[]
   notes?: {
     id: string
     content: string

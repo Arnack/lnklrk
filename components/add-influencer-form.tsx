@@ -288,13 +288,22 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
             
             <div className="space-y-2">
               <Label htmlFor="followersAge">Followers Age</Label>
-              <Input
-                id="followersAge"
-                name="followersAge"
-                placeholder="e.g., 18-34"
-                value={formData.followersAge}
-                onChange={handleInputChange}
-              />
+              <Select value={formData.followersAge} onValueChange={(value) => handleSelectChange("followersAge", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select age range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="13-17">13-17</SelectItem>
+                  <SelectItem value="18-24">18-24</SelectItem>
+                  <SelectItem value="25-34">25-34</SelectItem>
+                  <SelectItem value="35-44">35-44</SelectItem>
+                  <SelectItem value="45-54">45-54</SelectItem>
+                  <SelectItem value="55-64">55-64</SelectItem>
+                  <SelectItem value="65+">65+</SelectItem>
+                  <SelectItem value="Mixed">Mixed</SelectItem>
+                </SelectContent>
+              </Select>
+
             </div>
             
             <div className="space-y-2">
