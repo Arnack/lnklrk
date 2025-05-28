@@ -137,7 +137,17 @@ export function LoginForm() {
         </div>
 
         {/* Left Column - Welcome Section with Solar System */}
-        <div className="flex-1 flex items-center justify-center relative">
+        <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-100 dark:bg-slate-800">
+          {/* Welcome Text */}
+          <div className="text-center mb-6">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 font-mono">
+              Chinny CRM
+            </h1>
+            <p className="text-blue-600 dark:text-blue-400 text-lg font-light max-w-sm">
+              Orchestrating influencer relationships with precision and clarity
+            </p>
+          </div>
+
           <div className="relative w-[600px] h-[600px]">
             {/* Central Sun */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -266,27 +276,19 @@ export function LoginForm() {
             </div>
           </div>
 
-          {/* Welcome Text */}
-          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 font-mono">
-              LinkLurk CRM
-            </h1>
-            <p className="text-blue-600 dark:text-blue-400 text-lg font-light max-w-sm">
-              Orchestrating influencer relationships with precision and clarity
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Influencers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                <span>Campaigns</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span>Analytics</span>
-              </div>
+          {/* Feature Icons */}
+          <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Influencers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span>Campaigns</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span>Analytics</span>
             </div>
           </div>
         </div>
@@ -296,15 +298,9 @@ export function LoginForm() {
           <div className="w-full max-w-md">
             {/* Form Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-white dark:bg-slate-800 border border-blue-500/30 dark:border-blue-400/30 rounded-lg mb-6">
-                {isLogin ? (
-                  <Shield className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-                ) : (
-                  <UserPlus className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-                )}
-              </div>
+              
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-mono">
-                {isLogin ? 'ACCESS_TERMINAL' : 'CREATE_PROFILE'}
+                {isLogin ? 'WELCOME_BACK' : 'CREATE_ACCOUNT'}
               </h2>
               <p className="text-gray-600 dark:text-slate-400 text-sm font-light">
                 {isLogin 
@@ -431,8 +427,8 @@ export function LoginForm() {
 
             {/* Footer */}
             <div className="text-center mt-6">
-              <p className="text-xs text-gray-500 dark:text-slate-500 font-mono uppercase tracking-wider">
-                Secure • Authenticated • Protected
+              <p className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider">
+                Created with ⌨️ & ❤️ by <a href="https://linklurk.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Greg</a>
               </p>
             </div>
           </div>
