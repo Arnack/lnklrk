@@ -1,6 +1,6 @@
 'use server';
 
-import { getAllInfluencers, getInfluencerById, createInfluencer, updateInfluencer, deleteInfluencer } from '@/lib/database';
+import { getAllInfluencers, getInfluencerById, createInfluencer, updateInfluencer, deleteInfluencer, type DbInfluencer } from '@/lib/database';
 import type { Influencer } from '@/types/influencer';
 
 export async function fetchAllInfluencers() {
@@ -21,7 +21,7 @@ export async function fetchInfluencerById(id: string) {
   }
 }
 
-export async function createNewInfluencer(data: Omit<Influencer, 'id'>) {
+export async function createNewInfluencer(data: Omit<DbInfluencer, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
     return await createInfluencer(data);
   } catch (error) {

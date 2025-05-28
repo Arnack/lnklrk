@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import { InfluencerTable } from "@/components/influencer-table"
 import { FilterBar } from "@/components/filter-bar"
 import { ImportExportButtons } from "@/components/import-export-buttons"
+import { AddInfluencerForm } from "@/components/add-influencer-form"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserMenu } from "@/components/user-menu"
 import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
@@ -41,6 +42,11 @@ export default function DashboardPage() {
     setFilteredInfluencers(newInfluencers)
   }
 
+  const handleInfluencerAdded = (newInfluencer: Influencer) => {
+    setInfluencers(prev => [newInfluencer, ...prev])
+    setFilteredInfluencers(prev => [newInfluencer, ...prev])
+  }
+
   const handleDeleteInfluencers = async (ids: string[]) => {
     try {
       // Delete each influencer from the database
@@ -72,6 +78,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <AddInfluencerForm onInfluencerAdded={handleInfluencerAdded} />
           <ImportExportButtons onDataUpdate={handleDataUpdate} />
           <UserMenu />
         </div>
