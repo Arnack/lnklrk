@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, AlertCircle, Loader2, Sparkles, Shield, UserPlus } from "lucide-react"
+import { Eye, EyeOff, AlertCircle, Loader2, Shield, UserPlus, Users, Target, Zap } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import LS from "@/app/service/LS"
 
@@ -63,185 +63,239 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 flex items-center justify-center p-6">
-      {/* Theme Toggle in top-right corner */}
-      <div className="absolute top-6 right-6 z-20">
+    <div className="min-h-screen flex bg-slate-900 relative overflow-hidden">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6 z-30">
         <ThemeToggle />
       </div>
 
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Floating Geometric Shapes */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-lg animate-bounce"></div>
-        <div className="absolute bottom-32 left-32 w-40 h-40 bg-gradient-to-br from-green-400/20 to-teal-400/20 rounded-full blur-2xl animate-pulse delay-700"></div>
-        
-        {/* Orbital Rings */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="w-96 h-96 border border-blue-200/30 dark:border-blue-300/20 rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border border-purple-200/30 dark:border-purple-300/20 rounded-full animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-pink-200/30 dark:border-pink-300/20 rounded-full animate-spin" style={{ animationDuration: '25s' }}></div>
+      {/* Blueprint Grid Background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="h-full w-full bg-slate-900" 
+             style={{
+               backgroundImage: `
+                 linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                 linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                 linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+                 linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px)
+               `,
+               backgroundSize: '50px 50px, 50px 50px, 10px 10px, 10px 10px'
+             }}>
         </div>
-
-        {/* Abstract Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(148,163,184,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.05)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 w-full max-w-md">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl mb-6">
-            {isLogin ? (
-              <Shield className="w-8 h-8 text-white" />
-            ) : (
-              <UserPlus className="w-8 h-8 text-white" />
-            )}
+      {/* Left Column - Welcome Section */}
+      <div className="flex-1 flex items-center justify-center relative">
+        {/* Solar System Container */}
+        <div className="relative w-96 h-96">
+          {/* Central Sun */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-lg shadow-yellow-400/50 flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full animate-pulse"></div>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-gray-100 dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent mb-2">
-            {isLogin ? 'Welcome Back' : 'Join LinkLurk'}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">
-            {isLogin 
-              ? 'Sign in to access your influencer management dashboard' 
-              : 'Create your account to start managing influencer relationships'
-            }
-          </p>
+
+          {/* Orbital Paths */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-blue-400/30 rounded-full"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-blue-400/20 rounded-full"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-blue-400/15 rounded-full"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border border-blue-400/10 rounded-full"></div>
+
+          {/* Planets */}
+          {/* Planet 1 */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 animate-spin" style={{ animationDuration: '8s' }}>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full shadow-sm shadow-blue-400/50">
+              <Users className="w-3 h-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+
+          {/* Planet 2 */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 animate-spin" style={{ animationDuration: '12s', animationDirection: 'reverse' }}>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full shadow-sm shadow-purple-400/50">
+              <Target className="w-4 h-4 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+
+          {/* Planet 3 */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 animate-spin" style={{ animationDuration: '16s' }}>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-sm shadow-green-400/50">
+              <Zap className="w-2 h-2 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+
+          {/* Planet 4 */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 animate-spin" style={{ animationDuration: '20s', animationDirection: 'reverse' }}>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gradient-to-br from-red-400 to-red-600 rounded-full shadow-sm shadow-red-400/50"></div>
+          </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 p-8 relative overflow-hidden">
-          {/* Card Background Decoration */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-400/10 to-orange-400/10 rounded-full blur-xl"></div>
-          
-          <form onSubmit={handleSubmit} className="space-y-6 relative">
-            {!isLogin && (
+        {/* Welcome Text */}
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center">
+          <h1 className="text-4xl font-bold text-white mb-4 font-mono">
+            LinkLurk CRM
+          </h1>
+          <p className="text-blue-400 text-lg font-light max-w-sm">
+            Orchestrating influencer relationships with precision and clarity
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-6 text-sm text-slate-400">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-400" />
+              <span>Influencers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-purple-400" />
+              <span>Campaigns</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-green-400" />
+              <span>Analytics</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column - Form Section */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {/* Form Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-slate-800 border border-blue-400/30 rounded-lg mb-6">
+              {isLogin ? (
+                <Shield className="w-7 h-7 text-blue-400" />
+              ) : (
+                <UserPlus className="w-7 h-7 text-blue-400" />
+              )}
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2 font-mono">
+              {isLogin ? 'ACCESS_TERMINAL' : 'CREATE_PROFILE'}
+            </h2>
+            <p className="text-slate-400 text-sm font-light">
+              {isLogin 
+                ? 'Enter credentials to access dashboard' 
+                : 'Initialize new user profile'
+              }
+            </p>
+          </div>
+
+          {/* Form Container */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-400/20 rounded-lg p-6 relative">
+            {/* Corner accents */}
+            <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-400/50"></div>
+            <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-400/50"></div>
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-blue-400/50"></div>
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-400/50"></div>
+            
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-mono text-blue-400 uppercase tracking-wider">
+                    Full Name
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="h-11 bg-slate-900/50 border-slate-600 rounded text-white placeholder:text-slate-500 focus:ring-1 focus:ring-blue-400 focus:border-blue-400 font-mono"
+                    required={!isLogin}
+                  />
+                </div>
+              )}
+              
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Full Name
+                <Label htmlFor="email" className="text-sm font-mono text-blue-400 uppercase tracking-wider">
+                  Email
                 </Label>
                 <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="h-12 bg-white/50 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  required={!isLogin}
-                />
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email address"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="h-12 bg-white/50 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="h-12 bg-white/50 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12"
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className="h-11 bg-slate-900/50 border-slate-600 rounded text-white placeholder:text-slate-500 focus:ring-1 focus:ring-blue-400 focus:border-blue-400 font-mono"
                   required
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                </Button>
               </div>
-            </div>
 
-            {error && (
-              <Alert variant="destructive" className="border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-red-700">{error}</AlertDescription>
-              </Alert>
-            )}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-mono text-blue-400 uppercase tracking-wider">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="h-11 bg-slate-900/50 border-slate-600 rounded text-white placeholder:text-slate-500 focus:ring-1 focus:ring-blue-400 focus:border-blue-400 font-mono pr-10"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-11 px-3 hover:bg-transparent text-slate-400 hover:text-blue-400"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {isLogin ? 'Signing you in...' : 'Creating your account...'}
-                </>
-              ) : (
-                <>
-                  {isLogin ? (
-                    <>
-                      <Shield className="mr-2 h-5 w-5" />
-                      Sign In
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="mr-2 h-5 w-5" />
-                      Create Account
-                    </>
-                  )}
-                </>
+              {error && (
+                <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
+                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <AlertDescription className="text-red-400 font-mono text-sm">{error}</AlertDescription>
+                </Alert>
               )}
-            </Button>
-          </form>
 
-          {/* Mode Toggle */}
-          <div className="mt-8 pt-6 border-t border-gray-200/50 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin)
-                setError(null)
-                setFormData({ email: "", password: "", name: "" })
-              }}
-              className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200 group"
-            >
-              {isLogin 
-                ? "Don't have an account? " 
-                : "Already have an account? "
-              }
-              <span className="text-blue-600 group-hover:text-blue-700 font-semibold underline decoration-2 underline-offset-2">
-                {isLogin ? "Sign up for free" : "Sign in here"}
-              </span>
-            </button>
+              <Button 
+                type="submit" 
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-mono text-sm uppercase tracking-wider rounded border border-blue-500 transition-all duration-200" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isLogin ? 'ACCESSING...' : 'INITIALIZING...'}
+                  </>
+                ) : (
+                  <>
+                    {isLogin ? 'ACCESS_SYSTEM' : 'CREATE_PROFILE'}
+                  </>
+                )}
+              </Button>
+            </form>
+
+            {/* Mode Toggle */}
+            <div className="mt-6 pt-4 border-t border-slate-700/50 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin)
+                  setError(null)
+                  setFormData({ email: "", password: "", name: "" })
+                }}
+                className="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors duration-200 uppercase tracking-wider"
+              >
+                {isLogin 
+                  ? "Need account? Create_Profile" 
+                  : "Have account? Access_System"
+                }
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
-            Secure authentication powered by{" "}
-            <span className="font-semibold text-gray-700">LinkLurk CRM</span>
-          </p>
+          {/* Footer */}
+          <div className="text-center mt-6">
+            <p className="text-xs text-slate-500 font-mono uppercase tracking-wider">
+              Secure • Authenticated • Protected
+            </p>
+          </div>
         </div>
       </div>
     </div>
