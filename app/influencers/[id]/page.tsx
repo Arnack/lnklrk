@@ -9,6 +9,8 @@ import { FileUploader } from "@/components/file-uploader"
 import { NotesSection } from "@/components/notes-section"
 import { MessageLog } from "@/components/message-log"
 import { CampaignHistory } from "@/components/campaign-history"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { UserMenu } from "@/components/user-menu"
 import {
   Dialog,
   DialogContent,
@@ -103,9 +105,13 @@ export default function InfluencerPage({ params }: { params: { id: string } }) {
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">{influencer.handle}</h1>
         </div>
-        <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-          <Trash2 className="mr-2 h-4 w-4" /> Delete Influencer
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserMenu />
+          <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Influencer
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">

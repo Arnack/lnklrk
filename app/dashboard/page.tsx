@@ -5,6 +5,7 @@ import { InfluencerTable } from "@/components/influencer-table"
 import { FilterBar } from "@/components/filter-bar"
 import { ImportExportButtons } from "@/components/import-export-buttons"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserMenu } from "@/components/user-menu"
 import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
 import type { Influencer } from "@/types/influencer"
 import { Loader2 } from "lucide-react"
@@ -72,6 +73,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <ImportExportButtons onDataUpdate={handleDataUpdate} />
+          <UserMenu />
         </div>
       </div>
 

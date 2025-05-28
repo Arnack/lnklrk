@@ -1,4 +1,3 @@
-
 class LS {
     static setUserId(userId: string) {
         if (typeof window !== 'undefined') {
@@ -56,6 +55,7 @@ class LS {
     static removeUserInfo() {
         if (typeof window !== 'undefined') {
             localStorage?.removeItem('lpr64_user');
+            localStorage?.removeItem('lpr64_user_id');
         }
     }
 }
