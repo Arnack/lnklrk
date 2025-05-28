@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, AlertCircle, Loader2, Sparkles, Shield, UserPlus } from "lucide-react"
+import LS from "@/app/service/LS"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -45,6 +46,8 @@ export function LoginForm() {
         throw new Error(data.error || 'Authentication failed')
       }
 
+      console.log('>>>', data);
+      LS.setUserId(data?.user?.id);
       // Redirect to dashboard on success
       router.push('/dashboard')
     } catch (error) {

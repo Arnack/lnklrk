@@ -36,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Public routes that don't require authentication
   const publicRoutes = ['/login', '/']
 
-  const isAuthenticated = !!user?.access_token
+  const isAuthenticated = !!LS.getUserId()
 
   // Check if current route is public
   const isPublicRoute = pathname ? publicRoutes.includes(pathname) : false
@@ -50,6 +50,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!isLoading) {
       if (!isAuthenticated && !isPublicRoute) {
         // User is not authenticated and trying to access protected route
+
+        console.log('>>>', isAuthenticated, isPublicRoute);
         router.push('/login')
       } else if (isAuthenticated && pathname === '/login') {
         // User is authenticated but on login page, redirect to dashboard

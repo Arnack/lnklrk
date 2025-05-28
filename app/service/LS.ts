@@ -1,5 +1,19 @@
 
 class LS {
+    static setUserId(userId: string) {
+        if (typeof window !== 'undefined') {
+            localStorage?.setItem('lpr64_user_id', userId);
+        }
+    }
+
+    static getUserId() {
+        if (typeof window !== 'undefined') {
+            return localStorage?.getItem('lpr64_user_id');
+        }
+        return null;
+    }
+    
+
     static setUserInfo(user: any) {
         if (typeof window !== 'undefined') {
             localStorage?.setItem('lpr64_user', JSON.stringify(user));

@@ -50,6 +50,8 @@ export async function POST(request: Request) {
       path: '/',
     });
 
+    console.log('>>>', response);
+
     return response;
   } catch (error) {
     console.error('Login failed:', error);
