@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, AlertCircle, Loader2, Sparkles, Shield, UserPlus } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import LS from "@/app/service/LS"
 
 export function LoginForm() {
@@ -62,7 +63,12 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 flex items-center justify-center p-6">
+      {/* Theme Toggle in top-right corner */}
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating Geometric Shapes */}
@@ -72,13 +78,13 @@ export function LoginForm() {
         
         {/* Orbital Rings */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="w-96 h-96 border border-blue-200/30 rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border border-purple-200/30 rounded-full animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-pink-200/30 rounded-full animate-spin" style={{ animationDuration: '25s' }}></div>
+          <div className="w-96 h-96 border border-blue-200/30 dark:border-blue-300/20 rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border border-purple-200/30 dark:border-purple-300/20 rounded-full animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-pink-200/30 dark:border-pink-300/20 rounded-full animate-spin" style={{ animationDuration: '25s' }}></div>
         </div>
 
         {/* Abstract Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(148,163,184,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.05)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
       </div>
 
       {/* Main Content */}
@@ -92,10 +98,10 @@ export function LoginForm() {
               <UserPlus className="w-8 h-8 text-white" />
             )}
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-gray-100 dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent mb-2">
             {isLogin ? 'Welcome Back' : 'Join LinkLurk'}
           </h1>
-          <p className="text-gray-600 font-medium">
+          <p className="text-gray-600 dark:text-gray-300 font-medium">
             {isLogin 
               ? 'Sign in to access your influencer management dashboard' 
               : 'Create your account to start managing influencer relationships'
@@ -104,7 +110,7 @@ export function LoginForm() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 p-8 relative overflow-hidden">
           {/* Card Background Decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-400/10 to-orange-400/10 rounded-full blur-xl"></div>

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import { InfluencerTable } from "@/components/influencer-table"
 import { FilterBar } from "@/components/filter-bar"
 import { ImportExportButtons } from "@/components/import-export-buttons"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
 import type { Influencer } from "@/types/influencer"
 import { Loader2 } from "lucide-react"
@@ -68,7 +69,10 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Influencer Dashboard</h1>
           <p className="text-muted-foreground">Manage your influencers and campaigns in one place</p>
         </div>
-        <ImportExportButtons onDataUpdate={handleDataUpdate} />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <ImportExportButtons onDataUpdate={handleDataUpdate} />
+        </div>
       </div>
 
       <FilterBar influencers={influencers} onFilterChange={handleFilterChange} />
