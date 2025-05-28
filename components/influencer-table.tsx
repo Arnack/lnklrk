@@ -119,15 +119,17 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
 
   // Define column widths with fixed minimum widths for scrolling
   const columnWidths = {
-    checkbox: "w-[50px] min-w-[50px]",
-    handle: "w-[150px] min-w-[150px]",
-    platform: "w-[120px] min-w-[120px]",
-    followers: "w-[100px] min-w-[100px]",
-    rate: "w-[90px] min-w-[90px]",
-    category: "w-[200px] min-w-[200px]",
-    engagement: "w-[110px] min-w-[110px]",
-    demographics: "w-[150px] min-w-[150px]",
+    checkbox: "50px",
+    handle: "150px",
+    platform: "120px",
+    followers: "100px",
+    rate: "90px",
+    category: "200px",
+    engagement: "110px",
+    demographics: "150px",
   }
+
+  const gridCols = `${columnWidths.checkbox} ${columnWidths.handle} ${columnWidths.platform} ${columnWidths.followers} ${columnWidths.rate} ${columnWidths.category} ${columnWidths.engagement} ${columnWidths.demographics}`
 
   return (
     <div>
@@ -143,80 +145,79 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
       )}
 
       <div ref={parentRef} className="border rounded-md overflow-auto h-[calc(100vh-280px)]">
-        <Table className="relative min-w-[980px]">
-          <TableHeader className="sticky top-0 bg-background z-10">
-            <TableRow>
-              <TableHead className={columnWidths.checkbox}>
-                <Checkbox
-                  checked={influencers.length > 0 && selectedIds.length === influencers.length}
-                  onCheckedChange={handleSelectAll}
-                  aria-label="Select all"
-                />
-              </TableHead>
-              <TableHead className={columnWidths.handle}>Handle</TableHead>
-              <TableHead className={columnWidths.platform}>Platform</TableHead>
-              <TableHead className={columnWidths.followers}>Followers</TableHead>
-              <TableHead className={columnWidths.rate}>Rate</TableHead>
-              <TableHead className={columnWidths.category}>Category</TableHead>
-              <TableHead className={columnWidths.engagement}>Engagement</TableHead>
-              <TableHead className={columnWidths.demographics}>Demographics</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <tr style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: "relative", marginTop: "0px" }} />
+        <div className="min-w-[980px]">
+          {/* Header */}
+          <div 
+            className="grid sticky top-0 bg-background z-10 border-b font-medium h-12 items-center px-4"
+            style={{ gridTemplateColumns: gridCols }}
+          >
+            <div className="flex justify-center">
+              <Checkbox
+                checked={influencers.length > 0 && selectedIds.length === influencers.length}
+                onCheckedChange={handleSelectAll}
+                aria-label="Select all"
+              />
+            </div>
+            <div>Handle</div>
+            <div>Platform</div>
+            <div>Followers</div>
+            <div>Rate</div>
+            <div>Category</div>
+            <div>Engagement</div>
+            <div>Demographics</div>
+          </div>
+
+          {/* Virtual Content */}
+          <div className="relative" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const influencer = influencers[virtualRow.index]
               return (
-                <TableRow
+                <div
                   key={influencer.id}
-                  className="absolute top-0 left-0 w-full cursor-pointer hover:bg-muted"
+                  className="grid absolute top-0 left-0 w-full cursor-pointer hover:bg-muted h-[60px] items-center px-4 border-b"
                   style={{
+                    gridTemplateColumns: gridCols,
                     transform: `translateY(${virtualRow.start}px)`,
-                    marginTop: "48px",
                   }}
                   onClick={(e) => handleRowClick(influencer.id, e)}
                 >
-                  <TableCell className={columnWidths.checkbox}>
+                  <div className="flex justify-center">
                     <Checkbox
                       checked={selectedIds.includes(influencer.id)}
                       onCheckedChange={(checked) => handleSelectOne(influencer.id, !!checked)}
                       aria-label={`Select ${influencer.handle}`}
                       onClick={(e) => e.stopPropagation()}
                     />
-                  </TableCell>
-                  <TableCell className={`font-medium ${columnWidths.handle}`}>{influencer.handle}</TableCell>
-                  <TableCell className={columnWidths.platform}>
-                    <div className="flex items-center gap-1">
-                      {getPlatformIcon(influencer.platform)}
-                      <span>{influencer.platform}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className={columnWidths.followers}>{formatNumber(influencer.followers)}</TableCell>
-                  <TableCell className={columnWidths.rate}>${influencer.rate}</TableCell>
-                  <TableCell className={columnWidths.category}>
+                  </div>
+                  <div className="font-medium truncate pr-2">{influencer.handle}</div>
+                  <div className="flex items-center gap-1 truncate pr-2">
+                    {getPlatformIcon(influencer.platform)}
+                    <span className="truncate">{influencer.platform}</span>
+                  </div>
+                  <div className="truncate pr-2">{formatNumber(influencer.followers)}</div>
+                  <div className="truncate pr-2">${influencer.rate}</div>
+                  <div className="pr-2">
                     <div className="flex flex-wrap gap-1">
                       {influencer.categories.slice(0, 2).map((category, i) => (
-                        <Badge key={i} variant="outline">
+                        <Badge key={i} variant="outline" className="text-xs">
                           {category}
                         </Badge>
                       ))}
                       {influencer.categories.length > 2 && (
-                        <Badge variant="outline">+{influencer.categories.length - 2}</Badge>
+                        <Badge variant="outline" className="text-xs">+{influencer.categories.length - 2}</Badge>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className={columnWidths.engagement}>{influencer.engagement_rate}%</TableCell>
-                  <TableCell className={columnWidths.demographics}>
-                    <div className="text-xs">
-                      <div>{influencer.followers_age}</div>
-                      <div>{influencer.followers_sex}</div>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                  <div className="truncate pr-2">{influencer.engagement_rate}%</div>
+                  <div className="text-xs pr-2">
+                    <div className="truncate">{influencer.followers_age}</div>
+                    <div className="truncate">{influencer.followers_sex}</div>
+                  </div>
+                </div>
               )
             })}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
