@@ -5,7 +5,8 @@ import type { Influencer } from '@/types/influencer';
 
 export async function fetchAllInfluencers() {
   try {
-    return await getAllInfluencers();
+    const influencers = await getAllInfluencers();
+    return influencers;
   } catch (error) {
     console.error('Failed to fetch influencers:', error);
     throw new Error('Failed to fetch influencers');

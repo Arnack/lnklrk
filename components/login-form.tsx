@@ -71,8 +71,6 @@ export function LoginForm() {
       if (!response.ok) {
         throw new Error(data.error || 'Operation failed')
       }
-
-      console.log('>>>', data);
       
       if (formMode === 'login') {
         LS.setUserId(data?.user?.id);

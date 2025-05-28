@@ -1,13 +1,17 @@
 import type { Influencer } from '@/types/influencer';
-
+import axios from 'axios';
 const API_BASE = '/api';
 
 export async function fetchInfluencers(): Promise<Influencer[]> {
-  const response = await fetch(`${API_BASE}/influencers`);
-  if (!response.ok) {
+
+  try {
+    const response = await axios.get(`${API_BASE}/influencers`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch influencers:', error);
     throw new Error('Failed to fetch influencers');
   }
-  return response.json();
+
 }
 
 export async function fetchInfluencer(id: string): Promise<Influencer> {
