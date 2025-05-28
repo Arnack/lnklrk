@@ -313,10 +313,9 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
                   <SelectValue placeholder="Select gender distribution" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Mixed">Mixed</SelectItem>
+                  <SelectItem value="Mixed">Mixed/Balanced</SelectItem>
                   <SelectItem value="Mostly Male">Mostly Male</SelectItem>
                   <SelectItem value="Mostly Female">Mostly Female</SelectItem>
-                  <SelectItem value="Equal">Equal</SelectItem>
                 </SelectContent>
               </Select>
             </div>

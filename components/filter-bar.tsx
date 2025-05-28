@@ -66,12 +66,23 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
 
     // Filter by gender
     if (selectedGender) {
-      filtered = filtered.filter((inf) => inf.followersSex.includes(selectedGender))
+      filtered = filtered.filter((inf) => {
+        if (selectedGender === "Male-dominant") {
+          return inf.followers_sex === "Mostly Male"
+        }
+        if (selectedGender === "Female-dominant") {
+          return inf.followers_sex === "Mostly Female"
+        }
+        if (selectedGender === "Balanced") {
+          return inf.followers_sex === "Mixed"
+        }
+        return true
+      })
     }
 
     // Filter by age
     if (selectedAge) {
-      filtered = filtered.filter((inf) => inf.followersAge.includes(selectedAge))
+      filtered = filtered.filter((inf) => inf.followers_age?.includes(selectedAge))
     }
 
     onFilterChange(filtered)
@@ -95,6 +106,8 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
     return count.toString()
   }
 
+  console.log(selectedGender)
+  console.log('influencers >>>', influencers)
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
