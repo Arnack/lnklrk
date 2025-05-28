@@ -28,18 +28,11 @@ interface InfluencerTableProps {
 
 export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps) {
   const router = useRouter()
-  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0)
   const parentRef = useRef<HTMLDivElement>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
 
   // Reset selected IDs when influencers change
   useEffect(() => {
@@ -124,16 +117,16 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
     return num.toString()
   }
 
-  // Define column widths
+  // Define column widths with fixed minimum widths for scrolling
   const columnWidths = {
-    checkbox: "w-[40px]",
-    handle: "w-[20%] min-w-[120px]",
-    platform: "w-[15%] min-w-[100px]",
-    followers: "w-[10%] min-w-[80px]",
-    rate: "w-[10%] min-w-[80px]",
-    category: "w-[20%] min-w-[150px]",
-    engagement: "w-[10%] min-w-[100px]",
-    demographics: "w-[15%] min-w-[120px]",
+    checkbox: "w-[50px] min-w-[50px]",
+    handle: "w-[150px] min-w-[150px]",
+    platform: "w-[120px] min-w-[120px]",
+    followers: "w-[100px] min-w-[100px]",
+    rate: "w-[90px] min-w-[90px]",
+    category: "w-[200px] min-w-[200px]",
+    engagement: "w-[110px] min-w-[110px]",
+    demographics: "w-[150px] min-w-[150px]",
   }
 
   return (
@@ -150,7 +143,7 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
       )}
 
       <div ref={parentRef} className="border rounded-md overflow-auto h-[calc(100vh-280px)]">
-        <Table className="relative">
+        <Table className="relative min-w-[980px]">
           <TableHeader className="sticky top-0 bg-background z-10">
             <TableRow>
               <TableHead className={columnWidths.checkbox}>
@@ -161,12 +154,12 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                 />
               </TableHead>
               <TableHead className={columnWidths.handle}>Handle</TableHead>
-              {windowWidth > 640 && <TableHead className={columnWidths.platform}>Platform</TableHead>}
+              <TableHead className={columnWidths.platform}>Platform</TableHead>
               <TableHead className={columnWidths.followers}>Followers</TableHead>
-              {windowWidth > 768 && <TableHead className={columnWidths.rate}>Rate</TableHead>}
-              {windowWidth > 1024 && <TableHead className={columnWidths.category}>Category</TableHead>}
-              {windowWidth > 1280 && <TableHead className={columnWidths.engagement}>Engagement</TableHead>}
-              {windowWidth > 1280 && <TableHead className={columnWidths.demographics}>Demographics</TableHead>}
+              <TableHead className={columnWidths.rate}>Rate</TableHead>
+              <TableHead className={columnWidths.category}>Category</TableHead>
+              <TableHead className={columnWidths.engagement}>Engagement</TableHead>
+              <TableHead className={columnWidths.demographics}>Demographics</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,41 +184,33 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                     />
                   </TableCell>
                   <TableCell className={`font-medium ${columnWidths.handle}`}>{influencer.handle}</TableCell>
-                  {windowWidth > 640 && (
-                    <TableCell className={columnWidths.platform}>
-                      <div className="flex items-center gap-1">
-                        {getPlatformIcon(influencer.platform)}
-                        <span>{influencer.platform}</span>
-                      </div>
-                    </TableCell>
-                  )}
+                  <TableCell className={columnWidths.platform}>
+                    <div className="flex items-center gap-1">
+                      {getPlatformIcon(influencer.platform)}
+                      <span>{influencer.platform}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className={columnWidths.followers}>{formatNumber(influencer.followers)}</TableCell>
-                  {windowWidth > 768 && <TableCell className={columnWidths.rate}>${influencer.rate}</TableCell>}
-                  {windowWidth > 1024 && (
-                    <TableCell className={columnWidths.category}>
-                      <div className="flex flex-wrap gap-1">
-                        {influencer.categories.slice(0, 2).map((category, i) => (
-                          <Badge key={i} variant="outline">
-                            {category}
-                          </Badge>
-                        ))}
-                        {influencer.categories.length > 2 && (
-                          <Badge variant="outline">+{influencer.categories.length - 2}</Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                  )}
-                  {windowWidth > 1280 && (
-                    <TableCell className={columnWidths.engagement}>{influencer.engagementRate}%</TableCell>
-                  )}
-                  {windowWidth > 1280 && (
-                    <TableCell className={columnWidths.demographics}>
-                      <div className="text-xs">
-                        <div>{influencer.followersAge}</div>
-                        <div>{influencer.followersSex}</div>
-                      </div>
-                    </TableCell>
-                  )}
+                  <TableCell className={columnWidths.rate}>${influencer.rate}</TableCell>
+                  <TableCell className={columnWidths.category}>
+                    <div className="flex flex-wrap gap-1">
+                      {influencer.categories.slice(0, 2).map((category, i) => (
+                        <Badge key={i} variant="outline">
+                          {category}
+                        </Badge>
+                      ))}
+                      {influencer.categories.length > 2 && (
+                        <Badge variant="outline">+{influencer.categories.length - 2}</Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className={columnWidths.engagement}>{influencer.engagementRate}%</TableCell>
+                  <TableCell className={columnWidths.demographics}>
+                    <div className="text-xs">
+                      <div>{influencer.followersAge}</div>
+                      <div>{influencer.followersSex}</div>
+                    </div>
+                  </TableCell>
                 </TableRow>
               )
             })}
