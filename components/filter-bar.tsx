@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import type { Influencer } from "@/types/influencer"
-import { Filter, X } from "lucide-react"
+import { Filter, X, Tag } from "lucide-react"
 
 interface FilterBarProps {
   influencers: Influencer[]
@@ -21,6 +21,7 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [followerRange, setFollowerRange] = useState<[number, number]>([0, 10000000])
   const [selectedGender, setSelectedGender] = useState<string>("")
   const [selectedAge, setSelectedAge] = useState<string>("")
@@ -28,6 +29,7 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
   // Extract unique values for filters
   const platforms = [...new Set(influencers.map((inf) => inf.platform))]
   const categories = [...new Set(influencers.flatMap((inf) => inf.categories))]
+  const tags = [...new Set(influencers.flatMap((inf) => inf.tags || []))].sort()
   const genders = ["Male-dominant", "Female-dominant", "Balanced"]
   const ageGroups = ["13-17", "18-24", "25-34", "35-44", "45+"]
 
@@ -61,6 +63,13 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
       filtered = filtered.filter((inf) => inf.categories.some((cat) => selectedCategories.includes(cat)))
     }
 
+    // Filter by tags
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((inf) => 
+        inf.tags && inf.tags.some((tag) => selectedTags.includes(tag))
+      )
+    }
+
     // Filter by follower range
     filtered = filtered.filter((inf) => inf.followers >= followerRange[0] && inf.followers <= followerRange[1])
 
@@ -86,12 +95,13 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
     }
 
     onFilterChange(filtered)
-  }, [influencers, searchTerm, selectedPlatforms, selectedCategories, followerRange, selectedGender, selectedAge])
+  }, [influencers, searchTerm, selectedPlatforms, selectedCategories, selectedTags, followerRange, selectedGender, selectedAge])
 
   const clearFilters = () => {
     setSearchTerm("")
     setSelectedPlatforms([])
     setSelectedCategories([])
+    setSelectedTags([])
     setFollowerRange([minFollowers, maxFollowers])
     setSelectedGender("")
     setSelectedAge("")
@@ -117,6 +127,9 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full"
+            style={{
+              minWidth: '200px',
+            }}
           />
         </div>
 
@@ -175,6 +188,48 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
                     <Label htmlFor={`category-${category}`}>{category}</Label>
                   </div>
                 ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="flex gap-2">
+                <Tag className="h-4 w-4" />
+                Tags
+                {selectedTags.length > 0 && (
+                  <Badge variant="secondary" className="text-xs h-5 min-w-5">
+                    {selectedTags.length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {tags.length > 0 ? (
+                  tags.map((tag) => (
+                    <div key={tag} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`tag-${tag}`}
+                        checked={selectedTags.includes(tag)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedTags([...selectedTags, tag])
+                          } else {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`tag-${tag}`} className="text-sm">
+                        {tag}
+                      </Label>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground text-center py-4">
+                    No tags found. Add tags to influencers to enable filtering.
+                  </div>
+                )}
               </div>
             </PopoverContent>
           </Popover>
@@ -257,6 +312,17 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
             <X
               className="h-3 w-3 cursor-pointer"
               onClick={() => setSelectedCategories(selectedCategories.filter((c) => c !== category))}
+            />
+          </Badge>
+        ))}
+
+        {selectedTags.map((tag) => (
+          <Badge key={tag} variant="default" className="flex items-center gap-1">
+            <Tag className="h-3 w-3" />
+            {tag}
+            <X
+              className="h-3 w-3 cursor-pointer"
+              onClick={() => setSelectedTags(selectedTags.filter((t) => t !== tag))}
             />
           </Badge>
         ))}

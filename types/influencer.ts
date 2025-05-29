@@ -7,6 +7,7 @@ export interface Influencer {
   email?: string
   rate: number
   categories: string[]
+  tags?: string[]
   followersAge: string
   followers_age: string
   followersSex: string

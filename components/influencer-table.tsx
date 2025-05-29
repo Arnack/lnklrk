@@ -124,12 +124,13 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
     platform: "120px",
     followers: "100px",
     rate: "90px",
-    category: "200px",
+    category: "180px",
+    tags: "160px",
     engagement: "110px",
     demographics: "150px",
   }
 
-  const gridCols = `${columnWidths.checkbox} ${columnWidths.handle} ${columnWidths.platform} ${columnWidths.followers} ${columnWidths.rate} ${columnWidths.category} ${columnWidths.engagement} ${columnWidths.demographics}`
+  const gridCols = `${columnWidths.checkbox} ${columnWidths.handle} ${columnWidths.platform} ${columnWidths.followers} ${columnWidths.rate} ${columnWidths.category} ${columnWidths.tags} ${columnWidths.engagement} ${columnWidths.demographics}`
 
   return (
     <div>
@@ -163,6 +164,7 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
             <div>Followers</div>
             <div>Rate</div>
             <div>Category</div>
+            <div>Tags</div>
             <div>Engagement</div>
             <div>Demographics</div>
           </div>
@@ -205,6 +207,24 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                       ))}
                       {influencer.categories.length > 2 && (
                         <Badge variant="outline" className="text-xs">+{influencer.categories.length - 2}</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="pr-2">
+                    <div className="flex flex-wrap gap-1">
+                      {influencer.tags && influencer.tags.length > 0 ? (
+                        <>
+                          {influencer.tags.slice(0, 2).map((tag, i) => (
+                            <Badge key={i} variant="default" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {influencer.tags.length > 2 && (
+                            <Badge variant="default" className="text-xs">+{influencer.tags.length - 2}</Badge>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No tags</span>
                       )}
                     </div>
                   </div>

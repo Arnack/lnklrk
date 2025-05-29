@@ -12,6 +12,7 @@ export type DbInfluencer = {
   email?: string;
   rate?: number;
   categories?: string[];
+  tags?: string[];
   followersAge?: string;
   followers_age?: string;
   followersSex?: string;
@@ -94,13 +95,13 @@ export async function createInfluencer(data: Omit<DbInfluencer, 'id' | 'createdA
     const result = await sql`
       INSERT INTO influencers (
         id, user_id, handle, profile_link, followers, email, rate, 
-        categories, followers_age, followers_sex, engagement_rate, 
+        categories, tags, followers_age, followers_sex, engagement_rate, 
         platform, brands_worked_with, notes, files, messages, campaigns,
         created_at, updated_at
       ) VALUES (
         ${id}, ${data.userId}, ${data.handle}, ${data.profileLink || null}, 
         ${data.followers || 0}, ${data.email || null}, ${data.rate || 0},
-        ${data.categories || []}, ${data.followersAge || data.followers_age || null},
+        ${data.categories || []}, ${data.tags || []}, ${data.followersAge || data.followers_age || null},
         ${data.followersSex || data.followers_sex || null}, 
         ${data.engagementRate || 0}, ${data.platform || 'Instagram'}, 
         ${data.brandsWorkedWith || []}, ${JSON.stringify(data.notes || [])}, 
@@ -133,6 +134,7 @@ export async function updateInfluencer(id: string, data: DbInfluencerUpdate) {
         email = ${data.email || null},
         rate = ${data.rate || 0},
         categories = ${data.categories || []},
+        tags = ${data.tags || []},
         followers_age = ${data.followersAge || data.followers_age || null},
         followers_sex = ${data.followersSex || data.followers_sex || null},
         engagement_rate = ${data.engagementRate || data.engagement_rate || 0},
@@ -182,13 +184,13 @@ export async function importInfluencers(data: Array<Omit<DbInfluencer, 'id' | 'c
       const result = await sql`
         INSERT INTO influencers (
           id, user_id, handle, profile_link, followers, email, rate, 
-          categories, followers_age, followers_sex, engagement_rate, 
+          categories, tags, followers_age, followers_sex, engagement_rate, 
           platform, brands_worked_with, notes, files, messages, campaigns,
           created_at, updated_at
         ) VALUES (
           ${id}, ${item.userId}, ${item.handle}, ${item.profileLink || null}, 
           ${item.followers || 0}, ${item.email || null}, ${item.rate || 0},
-          ${item.categories || []}, ${item.followersAge || null}, ${item.followersSex || null}, 
+          ${item.categories || []}, ${item.tags || []}, ${item.followersAge || null}, ${item.followersSex || null}, 
           ${item.engagementRate || 0}, ${item.platform || 'Instagram'}, 
           ${item.brandsWorkedWith || []}, ${JSON.stringify(item.notes || [])}, 
           ${JSON.stringify(item.files || [])}, ${JSON.stringify(item.messages || [])}, 

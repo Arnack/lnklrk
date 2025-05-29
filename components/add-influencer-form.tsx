@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { TagManager } from "@/components/tag-manager"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
@@ -43,6 +44,7 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
     engagementRate: 0,
     platform: "Instagram",
     brandsWorkedWith: [] as string[],
+    tags: [] as string[],
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,6 +109,7 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
       engagementRate: 0,
       platform: "Instagram",
       brandsWorkedWith: [],
+      tags: [],
     })
     setNewCategory("")
     setNewBrand("")
@@ -379,6 +382,13 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
                 </Button>
               </div>
             </div>
+
+            {/* Tags Section */}
+            <TagManager
+              tags={formData.tags}
+              onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+              placeholder="Add tags like 'US-based', 'top performer'..."
+            />
           </div>
           
           <DialogFooter>

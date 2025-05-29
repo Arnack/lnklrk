@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { TagManager } from "@/components/tag-manager"
 import type { Influencer } from "@/types/influencer"
 import { Check, Edit, Plus, X } from "lucide-react"
 
@@ -282,6 +283,30 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
             )}
           </div>
         </div>
+
+        {/* Tags Section */}
+        {isEditing ? (
+          <TagManager
+            tags={formData.tags || []}
+            onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+            placeholder="Add tags like 'US-based', 'top performer'..."
+          />
+        ) : (
+          <div>
+            <Label>Tags</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {influencer.tags && influencer.tags.length > 0 ? (
+                influencer.tags.map((tag, index) => (
+                  <Badge key={index} variant="default" className="text-sm">
+                    {tag}
+                  </Badge>
+                ))
+              ) : (
+                <div className="text-muted-foreground text-sm">No tags added</div>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

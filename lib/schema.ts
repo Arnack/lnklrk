@@ -19,6 +19,7 @@ export const influencers = pgTable('influencers', {
   email: text('email'),
   rate: integer('rate').default(0),
   categories: text('categories').array(),
+  tags: text('tags').array(),
   followersAge: text('followers_age'),
   followersSex: text('followers_sex'),
   engagementRate: integer('engagement_rate').default(0),

@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS influencers (
   email TEXT,
   rate INTEGER DEFAULT 0,
   categories TEXT[],
+  tags TEXT[],
   followers_age TEXT,
   followers_sex TEXT,
   engagement_rate INTEGER DEFAULT 0,
@@ -28,4 +29,7 @@ CREATE TABLE IF NOT EXISTS influencers (
   campaigns JSONB,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-); 
+);
+
+-- Add tags column to existing table if it doesn't exist
+ALTER TABLE influencers ADD COLUMN IF NOT EXISTS tags TEXT[]; 
