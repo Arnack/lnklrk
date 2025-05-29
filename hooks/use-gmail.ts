@@ -38,6 +38,8 @@ export function useGmail(options: UseGmailOptions = {}) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed')
       setIsLoading(false)
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 

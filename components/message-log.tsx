@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Plus, 
   ArrowDown, 
@@ -28,11 +29,21 @@ import {
   Link,
   Download,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  Wand2
 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import { useGmail } from "@/hooks/use-gmail"
 import { toast } from "sonner"
+import { 
+  emailTemplates, 
+  getTemplatesByCategory, 
+  getTemplateById, 
+  replaceVariables, 
+  extractVariables,
+  type EmailTemplate 
+} from "@/lib/email-templates"
 
 interface Message {
   id: string
@@ -53,6 +64,8 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
   const [isAddingMessage, setIsAddingMessage] = useState(false)
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set())
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
+  const [templateVariables, setTemplateVariables] = useState<Record<string, string>>({})
   const { isAuthenticated, isLoading, error, authenticate, fetchEmails, sendEmail } = useGmail()
   
   const [newMessage, setNewMessage] = useState<Omit<Message, "id" | "date">>({
@@ -73,6 +86,17 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
     }
   }, [isAuthenticated, influencerEmail])
 
+  // Auto-fill common variables when template is selected
+  useEffect(() => {
+    if (selectedTemplate && influencerName) {
+      const commonVariables: Record<string, string> = {
+        influencerName: influencerName,
+        // Add other common variables here as needed
+      }
+      setTemplateVariables(prev => ({ ...commonVariables, ...prev }))
+    }
+  }, [selectedTemplate, influencerName])
+
   const toggleMessageExpansion = (messageId: string) => {
     const newExpanded = new Set(expandedMessages)
     if (newExpanded.has(messageId)) {
@@ -86,6 +110,48 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
   const truncateContent = (content: string, maxLength: number = 150) => {
     if (content.length <= maxLength) return content
     return content.substring(0, maxLength).trim() + "..."
+  }
+
+  const handleTemplateSelect = (templateId: string) => {
+    const template = getTemplateById(templateId)
+    if (template) {
+      setSelectedTemplate(template)
+      // Initialize variables with common ones
+      const variables: Record<string, string> = {
+        influencerName: influencerName || '',
+      }
+      setTemplateVariables(variables)
+      
+      // Apply template with current variables
+      const processedSubject = replaceVariables(template.subject, variables)
+      const processedContent = replaceVariables(template.content, variables)
+      
+      setEmailToSend({
+        subject: processedSubject,
+        content: processedContent,
+      })
+    }
+  }
+
+  const handleVariableChange = (variable: string, value: string) => {
+    const newVariables = { ...templateVariables, [variable]: value }
+    setTemplateVariables(newVariables)
+    
+    if (selectedTemplate) {
+      const processedSubject = replaceVariables(selectedTemplate.subject, newVariables)
+      const processedContent = replaceVariables(selectedTemplate.content, newVariables)
+      
+      setEmailToSend({
+        subject: processedSubject,
+        content: processedContent,
+      })
+    }
+  }
+
+  const resetEmailForm = () => {
+    setEmailToSend({ subject: "", content: "" })
+    setSelectedTemplate(null)
+    setTemplateVariables({})
   }
 
   const handleAddMessage = () => {
@@ -170,7 +236,7 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
       onUpdate([...messages, sentMessage])
       
       // Reset form
-      setEmailToSend({ subject: "", content: "" })
+      resetEmailForm()
       setIsSendingEmail(false)
       
       toast.success("Email sent successfully!")
@@ -284,7 +350,7 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
                     {/* Message Bubble */}
                     <div className={`relative rounded-2xl px-4 py-3 shadow-sm transition-all ${
                       isIncoming 
-                        ? 'bg-white border border-border rounded-tl-sm' 
+                        ? 'bg-white border border-border rounded-tl-sm dark:bg-gray-800 dark:border-gray-700' 
                         : 'bg-primary text-primary-foreground rounded-tr-sm'
                     }`}>
                       {/* Message Header */}
@@ -368,44 +434,151 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
         )}
 
         {/* Send Email Dialog */}
-        <Dialog open={isSendingEmail} onOpenChange={setIsSendingEmail}>
-          <DialogContent>
+        <Dialog open={isSendingEmail} onOpenChange={(open) => {
+          setIsSendingEmail(open)
+          if (!open) resetEmailForm()
+        }}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Send Email</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="h-5 w-5" />
+                Send Email to {influencerEmail || "Influencer"}
+              </DialogTitle>
               <DialogDescription>
-                Send an email to {influencerEmail || "the influencer"}
+                Choose a template or compose a custom email
               </DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email-subject">Subject</Label>
-                <Input
-                  id="email-subject"
-                  placeholder="Email subject"
-                  value={emailToSend.subject}
-                  onChange={(e) => setEmailToSend({ ...emailToSend, subject: e.target.value })}
-                />
-              </div>
+            <Tabs defaultValue="templates" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="templates" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Templates
+                </TabsTrigger>
+                <TabsTrigger value="custom" className="flex items-center gap-2">
+                  <Wand2 className="h-4 w-4" />
+                  Custom
+                </TabsTrigger>
+              </TabsList>
 
-              <div className="grid gap-2">
-                <Label htmlFor="email-content">Content</Label>
-                <Textarea
-                  id="email-content"
-                  placeholder="Email content"
-                  value={emailToSend.content}
-                  onChange={(e) => setEmailToSend({ ...emailToSend, content: e.target.value })}
-                  className="min-h-[200px]"
-                />
-              </div>
-            </div>
+              <TabsContent value="templates" className="space-y-4">
+                {/* Template Categories */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {['collaboration', 'follow-up', 'contract', 'introduction'].map((category) => (
+                    <div key={category} className="space-y-2">
+                      <h4 className="font-medium text-sm capitalize">{category}</h4>
+                      <div className="space-y-1">
+                        {getTemplatesByCategory(category as EmailTemplate['category']).map((template) => (
+                          <Button
+                            key={template.id}
+                            variant={selectedTemplate?.id === template.id ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleTemplateSelect(template.id)}
+                            className="w-full text-left justify-start h-auto p-2"
+                          >
+                            <div className="text-xs">
+                              {template.name}
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-            <DialogFooter>
+                {/* Template Variables */}
+                {selectedTemplate && (
+                  <div className="border rounded-lg p-4 bg-muted/30">
+                    <h4 className="font-medium mb-3 flex items-center gap-2">
+                      <Wand2 className="h-4 w-4" />
+                      Customize Template: {selectedTemplate.name}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {extractVariables(selectedTemplate).map((variable) => (
+                        <div key={variable} className="space-y-1">
+                          <Label htmlFor={`var-${variable}`} className="text-xs">
+                            {variable.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          </Label>
+                          <Input
+                            id={`var-${variable}`}
+                            value={templateVariables[variable] || ''}
+                            onChange={(e) => handleVariableChange(variable, e.target.value)}
+                            placeholder={`Enter ${variable}`}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Template Preview */}
+                {selectedTemplate && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="template-subject">Subject</Label>
+                      <Input
+                        id="template-subject"
+                        value={emailToSend.subject}
+                        onChange={(e) => setEmailToSend({ ...emailToSend, subject: e.target.value })}
+                        placeholder="Email subject"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="template-content">Content</Label>
+                      <Textarea
+                        id="template-content"
+                        value={emailToSend.content}
+                        onChange={(e) => setEmailToSend({ ...emailToSend, content: e.target.value })}
+                        placeholder="Email content"
+                        className="min-h-[300px] font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="custom" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-subject">Subject</Label>
+                    <Input
+                      id="custom-subject"
+                      placeholder="Email subject"
+                      value={emailToSend.subject}
+                      onChange={(e) => setEmailToSend({ ...emailToSend, subject: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-content">Content</Label>
+                    <Textarea
+                      id="custom-content"
+                      placeholder="Email content"
+                      value={emailToSend.content}
+                      onChange={(e) => setEmailToSend({ ...emailToSend, content: e.target.value })}
+                      className="min-h-[300px]"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <DialogFooter className="flex gap-2">
               <Button variant="outline" onClick={() => setIsSendingEmail(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSendEmail} disabled={isLoading}>
-                {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              <Button 
+                onClick={handleSendEmail} 
+                disabled={isLoading || !emailToSend.subject.trim() || !emailToSend.content.trim()}
+                className="flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
                 Send Email
               </Button>
             </DialogFooter>
