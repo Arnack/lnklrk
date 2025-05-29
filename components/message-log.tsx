@@ -26,7 +26,9 @@ import {
   RefreshCw,
   Send,
   Link,
-  Download
+  Download,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import { useGmail } from "@/hooks/use-gmail"
@@ -50,6 +52,7 @@ interface MessageLogProps {
 export function MessageLog({ messages, onUpdate, influencerEmail, influencerName }: MessageLogProps) {
   const [isAddingMessage, setIsAddingMessage] = useState(false)
   const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set())
   const { isAuthenticated, isLoading, error, authenticate, fetchEmails, sendEmail } = useGmail()
   
   const [newMessage, setNewMessage] = useState<Omit<Message, "id" | "date">>({
@@ -69,6 +72,21 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
       handleFetchEmails()
     }
   }, [isAuthenticated, influencerEmail])
+
+  const toggleMessageExpansion = (messageId: string) => {
+    const newExpanded = new Set(expandedMessages)
+    if (newExpanded.has(messageId)) {
+      newExpanded.delete(messageId)
+    } else {
+      newExpanded.add(messageId)
+    }
+    setExpandedMessages(newExpanded)
+  }
+
+  const truncateContent = (content: string, maxLength: number = 150) => {
+    if (content.length <= maxLength) return content
+    return content.substring(0, maxLength).trim() + "..."
+  }
 
   const handleAddMessage = () => {
     if (newMessage.subject.trim() && newMessage.content.trim()) {
@@ -243,35 +261,72 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`p-4 border rounded-md ${
-                  message.direction === "incoming" ? "bg-muted/30" : "bg-primary/5"
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    {message.direction === "incoming" ? (
-                      <ArrowDown className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <ArrowUp className="h-4 w-4 text-blue-500" />
-                    )}
-                    <div className="font-medium">{message.subject}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(message.date)}
+            {messages.map((message) => {
+              const isExpanded = expandedMessages.has(message.id)
+              const needsTruncation = message.content.length > 150
+              
+              return (
+                <div
+                  key={message.id}
+                  className={`border rounded-md transition-all ${
+                    message.direction === "incoming" ? "bg-muted/30" : "bg-primary/5"
+                  }`}
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        {message.direction === "incoming" ? (
+                          <ArrowDown className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        ) : (
+                          <ArrowUp className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        )}
+                        <div className="font-medium flex-1 min-w-0">{message.subject}</div>
+                        {needsTruncation && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleMessageExpansion(message.id)}
+                            className="flex-shrink-0 h-8 w-8 p-0"
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(message.date)}
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteMessage(message.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteMessage(message.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    
+                    <div className="whitespace-pre-wrap text-sm">
+                      {isExpanded || !needsTruncation 
+                        ? message.content 
+                        : truncateContent(message.content)
+                      }
+                      {needsTruncation && !isExpanded && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => toggleMessageExpansion(message.id)}
+                          className="p-0 h-auto font-normal text-primary ml-2"
+                        >
+                          Show more
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
