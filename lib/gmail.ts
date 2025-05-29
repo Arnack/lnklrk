@@ -3,6 +3,7 @@
 declare global {
   interface Window {
     gapi: any;
+    google: any;
   }
 }
 
@@ -30,209 +31,134 @@ export interface ParsedEmail {
 }
 
 class GmailService {
-  private accessToken: string | null = null
-  private isInitialized = false
+  private tokenClient: any
+  private gapiInited = false
+  private gisInited = false
+  private _isAuthenticated = false
 
   constructor() {
-    this.loadGoogleAPI()
+    this.loadGoogleAPIs()
   }
 
-  private async loadGoogleAPI() {
+  private async loadGoogleAPIs() {
     if (typeof window === 'undefined') return
 
-    // Load Google API script if not already loaded
+    // Load Google API script
     if (!window.gapi) {
-      const script = document.createElement('script')
-      script.src = 'https://apis.google.com/js/api.js'
-      script.onload = () => {
-        window.gapi.load('auth2', () => {
-          this.initializeGoogleAuth()
-        })
-      }
-      document.head.appendChild(script)
+      const gapiScript = document.createElement('script')
+      gapiScript.src = 'https://apis.google.com/js/api.js'
+      gapiScript.async = true
+      gapiScript.defer = true
+      gapiScript.onload = () => this.gapiLoaded()
+      document.head.appendChild(gapiScript)
     } else {
-      this.initializeGoogleAuth()
+      this.gapiLoaded()
+    }
+
+    // Load Google Identity Services script
+    if (!window.google?.accounts) {
+      const gisScript = document.createElement('script')
+      gisScript.src = 'https://accounts.google.com/gsi/client'
+      gisScript.async = true
+      gisScript.defer = true
+      gisScript.onload = () => this.gisLoaded()
+      document.head.appendChild(gisScript)
+    } else {
+      this.gisLoaded()
     }
   }
 
-  private async initializeGoogleAuth() {
-    try {
-      await window.gapi.auth2.init({
-        client_id: process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '',
-      })
-      
-      // Check if user is already signed in
-      const authInstance = window.gapi.auth2.getAuthInstance()
-      if (authInstance.isSignedIn.get()) {
-        const currentUser = authInstance.currentUser.get()
-        const authResponse = currentUser.getAuthResponse()
-        this.accessToken = authResponse.access_token
-        this.isInitialized = true
-        
-        // Store token for persistence
-        if (this.accessToken) {
-          localStorage.setItem('gmail_access_token', this.accessToken)
+  private gapiLoaded() {
+    window.gapi.load('client', () => this.initializeGapiClient())
+  }
+
+  private async initializeGapiClient() {
+    await window.gapi.client.init({
+      apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+      discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
+    })
+    this.gapiInited = true
+    this.maybeEnableAuth()
+  }
+
+  private gisLoaded() {
+    this.tokenClient = window.google.accounts.oauth2.initTokenClient({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send',
+      callback: (resp: any) => {
+        if (resp.error !== undefined) {
+          throw new Error(resp.error)
         }
-      } else {
-        // Try to load stored token
-        const storedToken = localStorage.getItem('gmail_access_token')
-        if (storedToken) {
-          this.accessToken = storedToken
-          this.isInitialized = true
-        }
-      }
-    } catch (error) {
-      console.error('Error initializing Google Auth:', error)
+        this._isAuthenticated = true
+        console.log('Authentication successful')
+      },
+    })
+    this.gisInited = true
+    this.maybeEnableAuth()
+  }
+
+  private maybeEnableAuth() {
+    if (this.gapiInited && this.gisInited) {
+      console.log('Gmail service ready for authentication')
     }
   }
 
   async authenticate(): Promise<void> {
-    if (typeof window === 'undefined') return
-
     return new Promise((resolve, reject) => {
-      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-      const redirectUri = process.env.NEXT_PUBLIC_GMAIL_REDIRECT_URI
-
-      console.log('clientId', clientId)
-      console.log('redirectUri', redirectUri)
-      
-      if (!clientId || !redirectUri) {
-        reject(new Error('Missing Gmail API configuration'))
+      if (!this.tokenClient) {
+        reject(new Error('Google Identity Services not loaded'))
         return
       }
 
-      const authUrl = `https://accounts.google.com/oauth/authorize?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${redirectUri}&` +
-        `scope=https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send&` +
-        `response_type=code&` +
-        `access_type=offline`
+      // Set up callback for this specific authentication request
+      this.tokenClient.callback = (resp: any) => {
+        if (resp.error !== undefined) {
+          reject(new Error(resp.error))
+          return
+        }
+        this._isAuthenticated = true
+        resolve()
+      }
 
-      // Redirect to Google OAuth
-      window.location.href = authUrl
+      if (window.gapi.client.getToken() === null) {
+        // Prompt the user to select a Google Account and ask for consent
+        this.tokenClient.requestAccessToken({ prompt: 'consent' })
+      } else {
+        // Skip display of account chooser and consent dialog for an existing session
+        this.tokenClient.requestAccessToken({ prompt: '' })
+      }
     })
-  }
-
-  async setTokens(code: string) {
-    try {
-      const clientId = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID
-      const clientSecret = process.env.NEXT_PUBLIC_GMAIL_CLIENT_SECRET
-      const redirectUri = process.env.NEXT_PUBLIC_GMAIL_REDIRECT_URI
-
-      console.log('clientId setTokens >>>', clientId)
-      console.log('clientSecret setTokens >>>', clientSecret)
-      console.log('redirectUri setTokens >>>', redirectUri)
-      
-      if (!clientId || !clientSecret || !redirectUri) {
-        throw new Error('Missing Gmail API configuration')
-      }
-
-      // Exchange authorization code for access token
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          code,
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUri,
-          grant_type: 'authorization_code',
-        }),
-      })
-
-      const tokens = await tokenResponse.json()
-      
-      if (tokens.error) {
-        throw new Error(tokens.error_description || tokens.error)
-      }
-
-      this.accessToken = tokens.access_token
-      this.isInitialized = true
-
-      // Store tokens in localStorage for persistence
-      if (this.accessToken) {
-        localStorage.setItem('gmail_access_token', this.accessToken)
-      }
-      if (tokens.refresh_token) {
-        localStorage.setItem('gmail_refresh_token', tokens.refresh_token)
-      }
-
-      return tokens
-    } catch (error) {
-      console.error('Error setting tokens:', error)
-      throw error
-    }
-  }
-
-  async loadStoredTokens(): Promise<boolean> {
-    if (typeof window === 'undefined') return false
-
-    try {
-      const storedToken = localStorage.getItem('gmail_access_token')
-      if (storedToken) {
-        this.accessToken = storedToken
-        this.isInitialized = true
-        return true
-      }
-    } catch (error) {
-      console.error('Error loading stored tokens:', error)
-    }
-    return false
-  }
-
-  private async makeGmailRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
-    if (!this.accessToken) {
-      throw new Error('Not authenticated')
-    }
-
-    const response = await fetch(`https://gmail.googleapis.com/gmail/v1${endpoint}`, {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    })
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        // Token expired, try to refresh
-        await this.refreshTokens()
-        // Retry the request
-        return this.makeGmailRequest(endpoint, options)
-      }
-      throw new Error(`Gmail API error: ${response.status} ${response.statusText}`)
-    }
-
-    return response.json()
   }
 
   async getEmailsWithContact(contactEmail: string, maxResults: number = 50): Promise<ParsedEmail[]> {
-    if (!this.isInitialized) {
-      throw new Error('Gmail service not authenticated')
+    if (!this._isAuthenticated) {
+      throw new Error('Not authenticated with Gmail')
     }
 
     try {
-      // Search for emails with the specific contact
       const query = `from:${contactEmail} OR to:${contactEmail}`
       
-      const response = await this.makeGmailRequest(
-        `/users/me/messages?q=${encodeURIComponent(query)}&maxResults=${maxResults}`
-      )
+      const response = await window.gapi.client.gmail.users.messages.list({
+        userId: 'me',
+        q: query,
+        maxResults: maxResults,
+      })
 
-      if (!response.messages) {
+      if (!response.result.messages) {
         return []
       }
 
       // Get full message details
       const emails: ParsedEmail[] = []
       
-      for (const message of response.messages) {
+      for (const message of response.result.messages) {
         try {
-          const fullMessage = await this.makeGmailRequest(`/users/me/messages/${message.id}`)
-          const parsedEmail = this.parseGmailMessage(fullMessage, contactEmail)
+          const fullMessage = await window.gapi.client.gmail.users.messages.get({
+            userId: 'me',
+            id: message.id,
+          })
+
+          const parsedEmail = this.parseGmailMessage(fullMessage.result, contactEmail)
           if (parsedEmail) {
             emails.push(parsedEmail)
           }
@@ -308,8 +234,8 @@ class GmailService {
   }
 
   async sendEmail(to: string, subject: string, content: string): Promise<void> {
-    if (!this.isInitialized) {
-      throw new Error('Gmail service not authenticated')
+    if (!this._isAuthenticated) {
+      throw new Error('Not authenticated with Gmail')
     }
 
     try {
@@ -325,11 +251,11 @@ class GmailService {
         .replace(/\//g, '_')
         .replace(/=+$/, '')
 
-      await this.makeGmailRequest('/users/me/messages/send', {
-        method: 'POST',
-        body: JSON.stringify({
+      await window.gapi.client.gmail.users.messages.send({
+        userId: 'me',
+        resource: {
           raw: encodedEmail,
-        }),
+        },
       })
     } catch (error) {
       console.error('Error sending email:', error)
@@ -337,64 +263,32 @@ class GmailService {
     }
   }
 
-  async refreshTokens(): Promise<void> {
-    const refreshToken = localStorage.getItem('gmail_refresh_token')
-    if (!refreshToken) {
-      throw new Error('No refresh token available')
-    }
-
-    try {
-      const clientId = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID
-      const clientSecret = process.env.NEXT_PUBLIC_GMAIL_CLIENT_SECRET
-      
-      if (!clientId || !clientSecret) {
-        throw new Error('Missing Gmail API configuration')
-      }
-
-      const response = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          refresh_token: refreshToken,
-          client_id: clientId,
-          client_secret: clientSecret,
-          grant_type: 'refresh_token',
-        }),
-      })
-
-      const tokens = await response.json()
-      
-      if (tokens.error) {
-        throw new Error(tokens.error_description || tokens.error)
-      }
-
-      this.accessToken = tokens.access_token
-      if (this.accessToken) {
-        localStorage.setItem('gmail_access_token', this.accessToken)
-      }
-    } catch (error) {
-      console.error('Error refreshing tokens:', error)
-      // If refresh fails, clear stored tokens
-      localStorage.removeItem('gmail_access_token')
-      localStorage.removeItem('gmail_refresh_token')
-      this.isInitialized = false
-      throw error
-    }
-  }
-
   isAuthenticated(): boolean {
-    return this.isInitialized && !!this.accessToken
+    return this._isAuthenticated && window.gapi?.client?.getToken() !== null
   }
 
   logout(): void {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('gmail_access_token')
-      localStorage.removeItem('gmail_refresh_token')
+    const token = window.gapi?.client?.getToken()
+    if (token !== null) {
+      window.google?.accounts?.oauth2?.revoke(token.access_token)
+      window.gapi?.client?.setToken('')
+      this._isAuthenticated = false
     }
-    this.accessToken = null
-    this.isInitialized = false
+  }
+
+  // Not needed with the new approach
+  async setTokens(code: string) {
+    throw new Error('setTokens not needed with Google Identity Services')
+  }
+
+  async loadStoredTokens(): Promise<boolean> {
+    // GAPI handles token persistence automatically
+    return this.isAuthenticated()
+  }
+
+  async refreshTokens(): Promise<void> {
+    // GAPI handles token refresh automatically
+    return
   }
 }
 

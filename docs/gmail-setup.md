@@ -43,13 +43,16 @@ Create a `.env.local` file in your project root with the following:
 
 ```env
 # Gmail API Configuration (Client-side)
-NEXT_PUBLIC_GMAIL_CLIENT_ID=your-client-id.apps.googleusercontent.com
-NEXT_PUBLIC_GMAIL_CLIENT_SECRET=your-client-secret
-NEXT_PUBLIC_GMAIL_REDIRECT_URI=http://localhost:3000/auth/gmail/callback
-NEXT_PUBLIC_GMAIL_SCOPES=https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+NEXT_PUBLIC_GOOGLE_API_KEY=your-api-key
 ```
 
 Replace the placeholder values with your actual credentials from Step 3.
+
+**Note:** You'll also need to create an API Key:
+1. In Google Cloud Console, go to "APIs & Services" > "Credentials"
+2. Click "Create Credentials" > "API key"
+3. Copy the API key and add it to your `.env.local`
 
 ## Step 5: Test the Integration
 
