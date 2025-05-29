@@ -179,11 +179,11 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
                   name="engagementRate"
                   type="number"
                   step="0.01"
-                  value={formData.engagementRate}
+                  value={formData.engagementRate || formData.engagement_rate}
                   onChange={handleInputChange}
                 />
               ) : (
-                <div>{influencer.engagementRate}%</div>
+                <div>{influencer.engagementRate || influencer.engagement_rate}%</div>
               )}
             </div>
 
@@ -193,11 +193,11 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
                 <Input
                   id="followersAge"
                   name="followersAge"
-                  value={formData.followersAge}
+                  value={formData.followersAge || formData.followers_age}
                   onChange={handleInputChange}
                 />
               ) : (
-                <div>{influencer.followersAge}</div>
+                <div>{influencer.followersAge || influencer.followers_age}</div>
               )}
             </div>
 
@@ -207,11 +207,11 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
                 <Input
                   id="followersSex"
                   name="followersSex"
-                  value={formData.followersSex}
+                  value={formData.followersSex || formData.followers_sex}
                   onChange={handleInputChange}
                 />
               ) : (
-                <div>{influencer.followersSex}</div>
+                <div>{influencer.followersSex || influencer.followers_sex}</div>
               )}
             </div>
           </div>

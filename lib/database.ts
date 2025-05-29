@@ -13,10 +13,14 @@ export type DbInfluencer = {
   rate?: number;
   categories?: string[];
   followersAge?: string;
+  followers_age?: string;
   followersSex?: string;
+  followers_sex?: string;
   engagementRate?: number;
+  engagement_rate?: number;
   platform?: string;
   brandsWorkedWith?: string[];
+  brands_worked_with?: string[];
   notes?: any;
   files?: any;
   messages?: any;
@@ -96,7 +100,8 @@ export async function createInfluencer(data: Omit<DbInfluencer, 'id' | 'createdA
       ) VALUES (
         ${id}, ${data.userId}, ${data.handle}, ${data.profileLink || null}, 
         ${data.followers || 0}, ${data.email || null}, ${data.rate || 0},
-        ${data.categories || []}, ${data.followersAge || null}, ${data.followersSex || null}, 
+        ${data.categories || []}, ${data.followersAge || data.followers_age || null},
+        ${data.followersSex || data.followers_sex || null}, 
         ${data.engagementRate || 0}, ${data.platform || 'Instagram'}, 
         ${data.brandsWorkedWith || []}, ${JSON.stringify(data.notes || [])}, 
         ${JSON.stringify(data.files || [])}, ${JSON.stringify(data.messages || [])}, 
@@ -128,11 +133,11 @@ export async function updateInfluencer(id: string, data: DbInfluencerUpdate) {
         email = ${data.email || null},
         rate = ${data.rate || 0},
         categories = ${data.categories || []},
-        followers_age = ${data.followersAge || null},
-        followers_sex = ${data.followersSex || null},
-        engagement_rate = ${data.engagementRate || 0},
+        followers_age = ${data.followersAge || data.followers_age || null},
+        followers_sex = ${data.followersSex || data.followers_sex || null},
+        engagement_rate = ${data.engagementRate || data.engagement_rate || 0},
         platform = ${data.platform || 'Instagram'},
-        brands_worked_with = ${data.brandsWorkedWith || []},
+        brands_worked_with = ${data.brandsWorkedWith || data.brands_worked_with || []},
         notes = ${JSON.stringify(data.notes || [])},
         files = ${JSON.stringify(data.files || [])},
         messages = ${JSON.stringify(data.messages || [])},
