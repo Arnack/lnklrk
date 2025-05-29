@@ -260,73 +260,110 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto p-4 bg-gradient-to-b from-muted/20 to-background rounded-lg">
             {messages.map((message) => {
               const isExpanded = expandedMessages.has(message.id)
               const needsTruncation = message.content.length > 150
+              const isIncoming = message.direction === "incoming"
               
               return (
                 <div
                   key={message.id}
-                  className={`border rounded-md transition-all ${
-                    message.direction === "incoming" ? "bg-muted/30" : "bg-primary/5"
-                  }`}
+                  className={`flex ${isIncoming ? 'justify-start' : 'justify-end'} mb-4 group`}
                 >
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2 flex-1">
-                        {message.direction === "incoming" ? (
-                          <ArrowDown className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        ) : (
-                          <ArrowUp className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                        )}
-                        <div className="font-medium flex-1 min-w-0">{message.subject}</div>
-                        {needsTruncation && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleMessageExpansion(message.id)}
-                            className="flex-shrink-0 h-8 w-8 p-0"
-                          >
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(message.date)}
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteMessage(message.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  <div className={`flex ${isIncoming ? 'flex-row' : 'flex-row-reverse'} items-end max-w-[80%] gap-2`}>
+                    {/* Avatar */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
+                      isIncoming 
+                        ? 'bg-green-100 text-green-700 border-2 border-green-200' 
+                        : 'bg-blue-100 text-blue-700 border-2 border-blue-200'
+                    }`}>
+                      {isIncoming ? (influencerName?.[0]?.toUpperCase() || 'T') : 'Y'}
                     </div>
                     
-                    <div className="whitespace-pre-wrap text-sm">
-                      {isExpanded || !needsTruncation 
-                        ? message.content 
-                        : truncateContent(message.content)
-                      }
-                      {needsTruncation && !isExpanded && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => toggleMessageExpansion(message.id)}
-                          className="p-0 h-auto font-normal text-primary ml-2"
-                        >
-                          Show more
-                        </Button>
-                      )}
+                    {/* Message Bubble */}
+                    <div className={`relative rounded-2xl px-4 py-3 shadow-sm transition-all ${
+                      isIncoming 
+                        ? 'bg-white border border-border rounded-tl-sm' 
+                        : 'bg-primary text-primary-foreground rounded-tr-sm'
+                    }`}>
+                      {/* Message Header */}
+                      <div className={`flex items-center gap-2 mb-2 text-xs ${
+                        isIncoming ? 'justify-start' : 'justify-end'
+                      }`}>
+                        <div className={`font-medium ${
+                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/80'
+                        }`}>
+                          {message.subject}
+                        </div>
+                        <div className={`${
+                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/70'
+                        }`}>
+                          {formatDate(message.date)}
+                        </div>
+                      </div>
+                      
+                      {/* Message Content */}
+                      <div className={`text-sm leading-relaxed ${
+                        isIncoming ? 'text-foreground' : 'text-primary-foreground'
+                      }`}>
+                        <div className="whitespace-pre-wrap">
+                          {isExpanded || !needsTruncation 
+                            ? message.content 
+                            : truncateContent(message.content)
+                          }
+                        </div>
+                        
+                        {/* Expand/Collapse Controls */}
+                        {needsTruncation && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleMessageExpansion(message.id)}
+                              className={`h-6 px-2 text-xs ${
+                                isIncoming 
+                                  ? 'text-muted-foreground hover:text-foreground hover:bg-muted' 
+                                  : 'text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10'
+                              }`}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronDown className="h-3 w-3 mr-1" />
+                                  Show less
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronRight className="h-3 w-3 mr-1" />
+                                  Show more
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Delete Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteMessage(message.id)}
+                        className={`absolute -top-2 ${isIncoming ? '-right-2' : '-left-2'} h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
+                          isIncoming 
+                            ? 'bg-white border border-border hover:bg-muted text-muted-foreground' 
+                            : 'bg-primary-foreground text-primary hover:bg-primary-foreground/90'
+                        }`}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
                 </div>
               )
             })}
+            
+            {/* Scroll to bottom spacer */}
+            <div className="h-1" />
           </div>
         )}
 
