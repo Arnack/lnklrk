@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TagManager } from "@/components/tag-manager"
 import type { Influencer } from "@/types/influencer"
 import { Check, Edit, Plus, X } from "lucide-react"
@@ -28,6 +29,13 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
     setFormData((prev) => ({
       ...prev,
       [name]: name === "followers" || name === "rate" || name === "engagementRate" ? Number(value) : value,
+    }))
+  }
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
     }))
   }
 
@@ -191,12 +199,24 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
             <div>
               <Label htmlFor="followersAge">Followers Age</Label>
               {isEditing ? (
-                <Input
-                  id="followersAge"
-                  name="followersAge"
+                <Select
                   value={formData.followersAge || formData.followers_age}
-                  onChange={handleInputChange}
-                />
+                  onValueChange={(value) => handleSelectChange("followersAge", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select age range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="13-17">13-17</SelectItem>
+                    <SelectItem value="18-24">18-24</SelectItem>
+                    <SelectItem value="25-34">25-34</SelectItem>
+                    <SelectItem value="35-44">35-44</SelectItem>
+                    <SelectItem value="45-54">45-54</SelectItem>
+                    <SelectItem value="55-64">55-64</SelectItem>
+                    <SelectItem value="65+">65+</SelectItem>
+                    <SelectItem value="Mixed">Mixed</SelectItem>
+                  </SelectContent>
+                </Select>
               ) : (
                 <div>{influencer.followersAge || influencer.followers_age}</div>
               )}
@@ -205,12 +225,19 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
             <div>
               <Label htmlFor="followersSex">Followers Gender</Label>
               {isEditing ? (
-                <Input
-                  id="followersSex"
-                  name="followersSex"
+                <Select
                   value={formData.followersSex || formData.followers_sex}
-                  onChange={handleInputChange}
-                />
+                  onValueChange={(value) => handleSelectChange("followersSex", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender distribution" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Mixed">Mixed/Balanced</SelectItem>
+                    <SelectItem value="Mostly Male">Mostly Male</SelectItem>
+                    <SelectItem value="Mostly Female">Mostly Female</SelectItem>
+                  </SelectContent>
+                </Select>
               ) : (
                 <div>{influencer.followersSex || influencer.followers_sex}</div>
               )}
