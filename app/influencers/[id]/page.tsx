@@ -146,6 +146,8 @@ export default function InfluencerPage({ params }: { params: { id: string } }) {
           <MessageLog
             messages={influencer.messages || []}
             onUpdate={(messages) => handleProfileUpdate({ ...influencer, messages })}
+            influencerEmail={influencer.email}
+            influencerName={influencer.handle}
           />
         </TabsContent>
 

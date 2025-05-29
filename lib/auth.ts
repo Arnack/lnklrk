@@ -1,4 +1,6 @@
 import bcrypt from 'bcryptjs';
+import { verify } from 'jsonwebtoken';
+import { NextRequest } from 'next/server';
 import { db, sql } from './db';
 import { users } from './schema';
 import { eq } from 'drizzle-orm';
@@ -173,5 +175,27 @@ export async function authenticateUserRaw(email: string, password: string): Prom
     console.error('Failed to authenticate user with raw SQL:', error);
     console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
     throw new Error('Authentication failed');
+  }
+}
+
+export async function authenticateToken(request: NextRequest): Promise<User | null> {
+  try {
+    const token = request.cookies.get('auth-token')?.value;
+    
+    if (!token) {
+      return null;
+    }
+
+    const decoded = verify(token, process.env.JWT_SECRET || 'fallback-secret-change-this') as any;
+    
+    if (!decoded.userId) {
+      return null;
+    }
+
+    const user = await getUserById(decoded.userId);
+    return user;
+  } catch (error) {
+    console.error('Token authentication failed:', error);
+    return null;
   }
 } 
