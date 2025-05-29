@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
 import { X, Plus, Tag, Sparkles } from "lucide-react"
 
 interface TagManagerProps {
@@ -163,36 +162,41 @@ export function TagManager({ tags, onTagsChange, allExistingTags = [], placehold
       )}
 
       {/* Add New Tag */}
-      <div className="flex gap-2">
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <PopoverTrigger asChild>
-            <div className="relative flex-1">
-              <Input
-                placeholder={placeholder}
-                value={inputValue}
-                onChange={(e) => handleInputChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setIsOpen(true)}
-                className="pr-10"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                onClick={() => inputValue.trim() && handleAddTag(inputValue)}
-                disabled={!inputValue.trim()}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="p-0 w-80" align="start">
+      <div className="relative">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              placeholder={placeholder}
+              value={inputValue}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsOpen(true)}
+              onBlur={(e) => {
+                // Delay closing to allow for clicks on suggestions
+                setTimeout(() => setIsOpen(false), 200)
+              }}
+              className="pr-10"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+              onClick={() => inputValue.trim() && handleAddTag(inputValue)}
+              disabled={!inputValue.trim()}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Popover positioned relative to input */}
+        {isOpen && (filteredSuggestions.length > 0 || inputValue.trim()) && (
+          <div 
+            className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.preventDefault()}
+          >
             <Command>
-              <CommandInput
-                placeholder="Search tags..."
-                value={inputValue}
-                onValueChange={handleInputChange}
-              />
               <CommandList>
                 <CommandEmpty>
                   {inputValue.trim() ? (
@@ -228,8 +232,8 @@ export function TagManager({ tags, onTagsChange, allExistingTags = [], placehold
                 )}
               </CommandList>
             </Command>
-          </PopoverContent>
-        </Popover>
+          </div>
+        )}
       </div>
 
       {/* Quick Add Popular Tags */}

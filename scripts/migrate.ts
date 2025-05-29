@@ -40,6 +40,7 @@ async function migrate() {
         email TEXT,
         rate INTEGER DEFAULT 0,
         categories TEXT[],
+        tags TEXT[],
         followers_age TEXT,
         followers_sex TEXT,
         engagement_rate INTEGER DEFAULT 0,
@@ -52,6 +53,11 @@ async function migrate() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `;
+
+    console.log('Adding tags column to existing table if it doesn\'t exist...');
+    await sql`
+      ALTER TABLE influencers ADD COLUMN IF NOT EXISTS tags TEXT[]
     `;
     
     console.log('Migration completed successfully');
