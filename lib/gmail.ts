@@ -113,19 +113,26 @@ class GmailService {
       // Set up callback for this specific authentication request
       this.tokenClient.callback = (resp: any) => {
         if (resp.error !== undefined) {
+          console.error('Authentication error:', resp.error)
           reject(new Error(resp.error))
           return
         }
         this._isAuthenticated = true
+        console.log('Authentication successful')
         resolve()
       }
 
-      if (window.gapi.client.getToken() === null) {
-        // Prompt the user to select a Google Account and ask for consent
-        this.tokenClient.requestAccessToken({ prompt: 'consent' })
-      } else {
-        // Skip display of account chooser and consent dialog for an existing session
-        this.tokenClient.requestAccessToken({ prompt: '' })
+      try {
+        if (window.gapi.client.getToken() === null) {
+          // Prompt the user to select a Google Account and ask for consent
+          this.tokenClient.requestAccessToken({ prompt: 'consent' })
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session
+          this.tokenClient.requestAccessToken({ prompt: '' })
+        }
+      } catch (error) {
+        console.error('Error during authentication:', error)
+        reject(new Error('Failed to start authentication process'))
       }
     })
   }
