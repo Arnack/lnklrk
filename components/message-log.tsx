@@ -32,7 +32,9 @@ import {
   ChevronUp,
   ChevronRight,
   FileText,
-  Wand2
+  Wand2,
+  SortAsc,
+  SortDesc
 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import { useGmail } from "@/hooks/use-gmail"
@@ -68,6 +70,7 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set())
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
   const [templateVariables, setTemplateVariables] = useState<Record<string, string>>({})
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const { isAuthenticated, isLoading, error, authenticate, fetchEmails, sendEmail } = useGmail()
   const [isGmailSetup, setIsGmailSetup] = useState(false)
 
@@ -275,6 +278,19 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
     return categories
   }
 
+  const getSortedMessages = () => {
+    const sorted = [...messages].sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB
+    })
+    return sorted
+  }
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')
+  }
+
   return (
     <div className="space-y-4">
       <GmailSetupAlert />
@@ -349,105 +365,132 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
               )}
             </div>
           ) : (
-            <div className="space-y-4 max-h-[600px] overflow-y-auto p-4 bg-gradient-to-b from-muted/20 to-background rounded-lg">
-              {messages.map((message) => {
-                const isExpanded = expandedMessages.has(message.id)
-                const needsTruncation = message.content.length > 150
-                const isIncoming = message.direction === "incoming"
+            <>
+              {/* Sorting Controls */}
+              <div className="flex items-center justify-between mb-4 px-4 py-2 bg-muted/30 rounded-md">
+                <div className="text-sm text-muted-foreground">
+                  {messages.length} message{messages.length !== 1 ? 's' : ''}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSortOrder}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  {sortOrder === 'newest' ? (
+                    <>
+                      <SortDesc className="h-4 w-4" />
+                      Newest first
+                    </>
+                  ) : (
+                    <>
+                      <SortAsc className="h-4 w-4" />
+                      Oldest first
+                    </>
+                  )}
+                </Button>
+              </div>
 
-                return (
-                  <div
-                    key={message.id}
-                    className={`group relative flex ${isIncoming ? 'justify-start' : 'justify-end'} mb-4`}
-                  >
-                    <div className={`max-w-[70%] ${isIncoming ? 'mr-12' : 'ml-12'}`}>
-                      <div
-                        className={`relative p-4 rounded-lg shadow-sm border ${
-                          isIncoming
-                            ? 'bg-white border-border text-foreground'
-                            : 'bg-primary text-primary-foreground'
-                        }`}
-                      >
-                        {/* Subject */}
-                        <div className={`font-medium text-sm mb-2 ${
-                          isIncoming ? 'text-foreground' : 'text-primary-foreground/90'
-                        }`}>
-                          {message.subject}
-                        </div>
+              <div className="space-y-4 max-h-[600px] overflow-y-auto p-4 bg-gradient-to-b from-muted/20 to-background rounded-lg">
+                {getSortedMessages().map((message) => {
+                  const isExpanded = expandedMessages.has(message.id)
+                  const needsTruncation = message.content.length > 150
+                  const isIncoming = message.direction === "incoming"
 
-                        {/* Content */}
-                        <div className={`text-sm ${
-                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/80'
-                        }`}>
-                          {isExpanded || !needsTruncation ? (
-                            <div className="whitespace-pre-wrap">{message.content}</div>
-                          ) : (
-                            <div>{truncateContent(message.content)}</div>
-                          )}
-                        </div>
-
-                        {/* Show more/less button */}
-                        {needsTruncation && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleMessageExpansion(message.id)}
-                            className={`mt-2 h-6 px-2 text-xs ${
-                              isIncoming
-                                ? 'hover:bg-muted text-muted-foreground'
-                                : 'hover:bg-primary-foreground/10 text-primary-foreground/70'
-                            }`}
-                          >
-                            {isExpanded ? (
-                              <>
-                                <ChevronUp className="h-3 w-3 mr-1" />
-                                Show less
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="h-3 w-3 mr-1" />
-                                Show more
-                              </>
-                            )}
-                          </Button>
-                        )}
-
-                        {/* Timestamp */}
-                        <div className={`text-xs mt-2 ${
-                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/60'
-                        }`}>
-                          <Calendar className="h-3 w-3 inline mr-1" />
-                          {formatDate(message.date)}
-                          {isIncoming && (
-                            <ArrowDown className="h-3 w-3 inline ml-2 mr-1" />
-                          )}
-                          {!isIncoming && (
-                            <ArrowUp className="h-3 w-3 inline ml-2 mr-1" />
-                          )}
-                        </div>
-
-                        {/* Delete button */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteMessage(message.id)}
-                          className={`absolute -top-2 ${isIncoming ? '-right-2' : '-left-2'} h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
-                            isIncoming 
-                              ? 'bg-white border border-border hover:bg-muted text-muted-foreground' 
-                              : 'bg-primary-foreground text-primary hover:bg-primary-foreground/90'
+                  return (
+                    <div
+                      key={message.id}
+                      className={`group relative flex ${isIncoming ? 'justify-start' : 'justify-end'} mb-4`}
+                    >
+                      <div className={`max-w-[70%] ${isIncoming ? 'mr-12' : 'ml-12'}`}>
+                        <div
+                          className={`relative p-4 rounded-lg shadow-sm border ${
+                            isIncoming
+                              ? 'bg-white border-border text-foreground'
+                              : 'bg-primary text-primary-foreground'
                           }`}
                         >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                          {/* Subject */}
+                          <div className={`font-medium text-sm mb-2 ${
+                            isIncoming ? 'text-foreground' : 'text-primary-foreground/90'
+                          }`}>
+                            {message.subject}
+                          </div>
+
+                          {/* Content */}
+                          <div className={`text-sm ${
+                            isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/80'
+                          }`}>
+                            {isExpanded || !needsTruncation ? (
+                              <div className="whitespace-pre-wrap">{message.content}</div>
+                            ) : (
+                              <div>{truncateContent(message.content)}</div>
+                            )}
+                          </div>
+
+                          {/* Show more/less button */}
+                          {needsTruncation && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleMessageExpansion(message.id)}
+                              className={`mt-2 h-6 px-2 text-xs ${
+                                isIncoming
+                                  ? 'hover:bg-muted text-muted-foreground'
+                                  : 'hover:bg-primary-foreground/10 text-primary-foreground/70'
+                              }`}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3 mr-1" />
+                                  Show less
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3 mr-1" />
+                                  Show more
+                                </>
+                              )}
+                            </Button>
+                          )}
+
+                          {/* Timestamp */}
+                          <div className={`text-xs mt-2 ${
+                            isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/60'
+                          }`}>
+                            <Calendar className="h-3 w-3 inline mr-1" />
+                            {formatDate(message.date)}
+                            {isIncoming && (
+                              <ArrowDown className="h-3 w-3 inline ml-2 mr-1" />
+                            )}
+                            {!isIncoming && (
+                              <ArrowUp className="h-3 w-3 inline ml-2 mr-1" />
+                            )}
+                          </div>
+
+                          {/* Delete button */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteMessage(message.id)}
+                            className={`absolute -top-2 ${isIncoming ? '-right-2' : '-left-2'} h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
+                              isIncoming 
+                                ? 'bg-white border border-border hover:bg-muted text-muted-foreground' 
+                                : 'bg-primary-foreground text-primary hover:bg-primary-foreground/90'
+                            }`}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-              
-              {/* Scroll to bottom spacer */}
-              <div className="h-1" />
-            </div>
+                  )
+                })}
+                
+                {/* Scroll to bottom spacer */}
+                <div className="h-1" />
+              </div>
+            </>
           )}
         </CardContent>
 
