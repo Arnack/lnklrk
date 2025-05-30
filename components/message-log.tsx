@@ -69,6 +69,12 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
   const [templateVariables, setTemplateVariables] = useState<Record<string, string>>({})
   const { isAuthenticated, isLoading, error, authenticate, fetchEmails, sendEmail } = useGmail()
+  const [isGmailSetup, setIsGmailSetup] = useState(false)
+
+  const handleGmailSetup = async () => {
+    await authenticate()
+    setIsGmailSetup(true)
+  }
   
   const [newMessage, setNewMessage] = useState<Omit<Message, "id" | "date">>({
     direction: "outgoing",
@@ -295,7 +301,7 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
           </div>
           <div className="flex gap-2">
             {!isAuthenticated ? (
-              <Button onClick={authenticate} size="sm" disabled={isLoading}>
+              <Button onClick={handleGmailSetup} size="sm" disabled={isLoading}>
                 <Link className="h-4 w-4 mr-2" />
                 Connect Gmail
               </Button>
