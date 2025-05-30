@@ -11,6 +11,7 @@ import { InfluencerStatusManager } from "@/components/influencer-status-manager"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { CampaignWithInfluencers, CampaignInfluencer } from "@/types/campaign"
 import { Loader2, ArrowLeft, Users, DollarSign, Calendar, Star, ExternalLink, Edit, ChevronDown, ChevronUp } from "lucide-react"
+import LS from "@/app/service/LS"
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()

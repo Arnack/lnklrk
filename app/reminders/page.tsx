@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, List, Plus, Filter, Search } from "lucide-react"
+import { Calendar, List, Plus, Filter, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { ReminderCalendar } from "@/components/reminder-calendar"
 import { ReminderList } from "@/components/reminder-list"
 import { CreateReminderDialog } from "@/components/create-reminder-dialog"
@@ -46,6 +46,7 @@ export default function RemindersPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('active')
+  const [showStats, setShowStats] = useState(false)
 
   useEffect(() => {
     fetchReminders()
@@ -124,42 +125,59 @@ export default function RemindersPage() {
             Manage your reminders for influencers and campaigns
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Reminder
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowStats(!showStats)} size="sm">
+            {showStats ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Hide Stats
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                Show Stats
+              </>
+            )}
+          </Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Reminder
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{activeRemindersCount}</div>
-            <p className="text-xs text-muted-foreground">Not expired or completed</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expired</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{expiredRemindersCount}</div>
-            <p className="text-xs text-muted-foreground">Past due date</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{completedRemindersCount}</div>
-            <p className="text-xs text-muted-foreground">Finished tasks</p>
-          </CardContent>
-        </Card>
-      </div>
+      {showStats && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{activeRemindersCount}</div>
+              <p className="text-xs text-muted-foreground">Not expired or completed</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Expired</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{expiredRemindersCount}</div>
+              <p className="text-xs text-muted-foreground">Past due date</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{completedRemindersCount}</div>
+              <p className="text-xs text-muted-foreground">Finished tasks</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4">
