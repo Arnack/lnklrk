@@ -43,12 +43,12 @@ const navigationItems = [
   //   icon: Bell,
   //   description: "Manage reminders"
   // },
-  // {
-  //   name: "Analytics",
-  //   href: "/analytics",
-  //   icon: BarChart3,
-  //   description: "Performance insights"
-  // },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    icon: BarChart3,
+    description: "Performance insights"
+  },
   // {
   //   name: "Reports",
   //   href: "/reports",
