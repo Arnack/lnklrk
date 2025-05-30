@@ -183,12 +183,14 @@ export function ReminderList({
     )
   }
 
+  console.log('reminders >>>', reminders)
+
   return (
     <div className="space-y-4">
       {reminders.map((reminder) => (
         <Card key={reminder.id} className={`transition-all ${
-          reminder.isExpired && !reminder.isCompleted ? 'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-950/20' :
-          reminder.isCompleted ? 'opacity-60' : ''
+          reminder?.isExpired && !reminder?.isCompleted ? 'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-950/20' :
+          reminder?.isCompleted ? 'opacity-60' : ''
         }`}>
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
@@ -196,7 +198,7 @@ export function ReminderList({
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     {getTypeIcon(reminder.type)}
-                    <CardTitle className={`text-lg ${reminder.isCompleted ? 'line-through' : ''}`}>
+                    <CardTitle className={`text-lg ${reminder?.isCompleted ? 'line-through' : ''}`}>
                       {reminder.title}
                     </CardTitle>
                   </div>

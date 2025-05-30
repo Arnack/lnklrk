@@ -74,6 +74,7 @@ export default function RemindersPage() {
       })
       if (response.ok) {
         const data = await response.json()
+        console.log('data >>>', data)
         setReminders(data.reminders || [])
       }
     } catch (error) {
@@ -105,9 +106,11 @@ export default function RemindersPage() {
     return true
   })
 
-  const activeRemindersCount = reminders.filter(r => !r.isExpired && !r.isCompleted).length
-  const expiredRemindersCount = reminders.filter(r => r.isExpired && !r.isCompleted).length
-  const completedRemindersCount = reminders.filter(r => r.isCompleted).length
+  const activeRemindersCount = reminders.filter(r => !r?.isExpired && !r?.isCompleted).length
+  const expiredRemindersCount = reminders.filter(r => r?.isExpired && !r?.isCompleted).length
+  const completedRemindersCount = reminders.filter(r => r?.isCompleted).length
+
+  console.log('reminders page >>>', reminders)
 
   return (
     <div className="container mx-auto p-6 space-y-6">
