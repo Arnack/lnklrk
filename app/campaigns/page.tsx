@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { AddCampaignForm } from "@/components/add-campaign-form"
+import LS from "@/app/service/LS"
 
 export default function CampaignsPage() {
   const router = useRouter()
@@ -34,7 +35,18 @@ export default function CampaignsPage() {
   const fetchCampaigns = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/campaigns')
+      const userId = LS.getUserId()
+      
+      if (!userId) {
+        setError('User not authenticated. Please log in.')
+        return
+      }
+      
+      const response = await fetch('/api/campaigns', {
+        headers: {
+          'x-user-id': userId,
+        }
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch campaigns')
       }

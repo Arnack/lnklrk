@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllCampaigns, createCampaign } from '@/lib/campaigns';
-import LS from '@/app/service/LS';
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || LS.getUserId();
+    const userId = request.headers.get('x-user-id');
     
     if (!userId) {
-      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'User ID is required' }, { status: 401 });
     }
 
     const campaigns = await getAllCampaigns(userId);
@@ -20,10 +19,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || LS.getUserId();
+    const userId = request.headers.get('x-user-id');
     
     if (!userId) {
-      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'User ID is required' }, { status: 401 });
     }
 
     const data = await request.json();

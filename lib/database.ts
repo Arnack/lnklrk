@@ -57,12 +57,22 @@ export async function initializeDatabase() {
   }
 }
 
-export async function getAllInfluencers() {
+export async function getAllInfluencers(userId?: string) {
   try {
-    console.log('Fetching all influencers with raw SQL');
-    const results = await sql`
-      SELECT * FROM influencers ORDER BY created_at DESC
-    `;
+    console.log('Fetching all influencers with raw SQL', userId ? `for user ${userId}` : '');
+    
+    let results;
+    if (userId) {
+      results = await sql`
+        SELECT * FROM influencers WHERE user_id = ${userId} ORDER BY created_at DESC
+      `;
+    } else {
+      // Fallback for backward compatibility, but this should be avoided in production
+      results = await sql`
+        SELECT * FROM influencers ORDER BY created_at DESC
+      `;
+    }
+    
     console.log('Raw SQL query result:', results);
     return results;
   } catch (error) {

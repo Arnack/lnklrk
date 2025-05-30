@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAllInfluencers, createInfluencer } from '@/lib/database';
 import type { Influencer } from '@/types/influencer';
 
@@ -6,9 +6,15 @@ import type { Influencer } from '@/types/influencer';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const influencers = await getAllInfluencers();
+    const userId = request.headers.get('x-user-id');
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 401 });
+    }
+
+    const influencers = await getAllInfluencers(userId);
     return NextResponse.json(influencers);
   } catch (error) {
     console.error('Failed to fetch influencers:', error);
@@ -19,10 +25,19 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const userId = request.headers.get('x-user-id');
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 401 });
+    }
+
     const data = await request.json();
-    const influencer = await createInfluencer(data);
+    const influencer = await createInfluencer({
+      ...data,
+      userId,
+    });
     return NextResponse.json(influencer);
   } catch (error) {
     console.error('Failed to create influencer:', error);

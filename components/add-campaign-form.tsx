@@ -84,7 +84,6 @@ export function AddCampaignForm({ onCampaignAdded }: AddCampaignFormProps) {
     try {
       const campaignData = {
         ...formData,
-        userId,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
         startDate: formData.startDate || undefined,
         endDate: formData.endDate || undefined,
@@ -94,6 +93,7 @@ export function AddCampaignForm({ onCampaignAdded }: AddCampaignFormProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': userId,
         },
         body: JSON.stringify(campaignData),
       })
@@ -220,7 +220,7 @@ export function AddCampaignForm({ onCampaignAdded }: AddCampaignFormProps) {
               </div>
             </div>
 
-            <div className="grid gap-2">
+            {/* <div className="grid gap-2">
               <Label htmlFor="brief-url">Campaign Brief URL</Label>
               <Input
                 id="brief-url"
@@ -229,7 +229,7 @@ export function AddCampaignForm({ onCampaignAdded }: AddCampaignFormProps) {
                 value={formData.briefUrl}
                 onChange={(e) => setFormData({ ...formData, briefUrl: e.target.value })}
               />
-            </div>
+            </div> */}
 
             <div className="grid gap-2">
               <Label htmlFor="notes">Notes</Label>
