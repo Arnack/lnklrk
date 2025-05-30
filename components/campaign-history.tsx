@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { CampaignInfluencer } from "@/types/campaign"
 import { Loader2 } from "lucide-react"
+import LS from "@/app/service/LS"
 
 interface CampaignHistoryProps {
   influencerId: string
@@ -41,7 +42,11 @@ export function CampaignHistory({ influencerId }: CampaignHistoryProps) {
   const fetchInfluencerCampaigns = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch(`/api/influencers/${influencerId}/campaigns`)
+      const response = await fetch(`/api/influencers/${influencerId}/campaigns`, {
+        headers: {
+          'x-user-id': LS.getUserId() || '',
+        },
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch campaigns')
       }

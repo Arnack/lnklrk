@@ -7,8 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import type { Campaign } from "@/types/campaign"
-import { Loader2, Eye, Edit, Trash2, Users, DollarSign, Calendar, TrendingUp } from "lucide-react"
+import { Loader2, Eye, Edit, Trash2, Users, DollarSign, Calendar, TrendingUp, ChevronDown, ChevronUp, Search, Filter, X } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -27,6 +30,46 @@ export default function CampaignsPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showStatsCards, setShowStatsCards] = useState(false)
+  
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [budgetMin, setBudgetMin] = useState("")
+  const [budgetMax, setBudgetMax] = useState("")
+
+  // Filtered campaigns
+  const filteredCampaigns = campaigns.filter(campaign => {
+    // Search by name
+    if (searchTerm && !campaign.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false
+    }
+    
+    // Filter by status
+    if (statusFilter !== "all" && campaign.status !== statusFilter) {
+      return false
+    }
+    
+    // Filter by budget range
+    if (budgetMin && campaign.budget && campaign.budget < parseFloat(budgetMin)) {
+      return false
+    }
+    if (budgetMax && campaign.budget && campaign.budget > parseFloat(budgetMax)) {
+      return false
+    }
+    
+    return true
+  })
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setStatusFilter("all")
+    setBudgetMin("")
+    setBudgetMax("")
+  }
+
+  const hasActiveFilters = searchTerm || statusFilter !== "all" || budgetMin || budgetMax
 
   useEffect(() => {
     fetchCampaigns()
@@ -129,6 +172,34 @@ export default function CampaignsPage() {
           <p className="text-muted-foreground">Manage your influencer marketing campaigns</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowStatsCards(!showStatsCards)}
+            className="flex items-center gap-2"
+          >
+            {showStatsCards ? (
+              <>
+                Hide Stats <ChevronUp className="h-4 w-4" />
+              </>
+            ) : (
+              <>
+                Show Stats <ChevronDown className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+            {hasActiveFilters && (
+              <Badge variant="secondary" className="ml-1 px-1 py-0 text-xs">
+                {[searchTerm, statusFilter !== "all", budgetMin, budgetMax].filter(Boolean).length}
+              </Badge>
+            )}
+          </Button>
           <AddCampaignForm onCampaignAdded={handleCampaignAdded} />
         </div>
       </div>
@@ -139,59 +210,151 @@ export default function CampaignsPage() {
         </Alert>
       )}
 
+      {/* Filters */}
+      {showFilters && (
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Filters</CardTitle>
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search */}
+              <div className="space-y-2">
+                <Label htmlFor="search">Search Campaigns</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="search"
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Budget Min */}
+              <div className="space-y-2">
+                <Label htmlFor="budget-min">Min Budget</Label>
+                <Input
+                  id="budget-min"
+                  type="number"
+                  placeholder="0"
+                  value={budgetMin}
+                  onChange={(e) => setBudgetMin(e.target.value)}
+                />
+              </div>
+
+              {/* Budget Max */}
+              <div className="space-y-2">
+                <Label htmlFor="budget-max">Max Budget</Label>
+                <Input
+                  id="budget-max"
+                  type="number"
+                  placeholder="No limit"
+                  value={budgetMax}
+                  onChange={(e) => setBudgetMax(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{campaigns.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {campaigns.filter(c => c.status === 'active').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Influencers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {campaigns.reduce((sum, c) => sum + (c.totalInfluencers || 0), 0)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(campaigns.reduce((sum, c) => sum + (c.totalSpent || 0), 0))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {showStatsCards && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{campaigns.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {campaigns.filter(c => c.status === 'active').length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Influencers</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {campaigns.reduce((sum, c) => sum + (c.totalInfluencers || 0), 0)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(campaigns.reduce((sum, c) => sum + (c.totalSpent || 0), 0))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Campaigns Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Campaigns</CardTitle>
-          <CardDescription>
-            View and manage all your influencer marketing campaigns
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Your Campaigns</CardTitle>
+              <CardDescription>
+                View and manage all your influencer marketing campaigns
+                {hasActiveFilters && filteredCampaigns.length !== campaigns.length && (
+                  <span className="ml-2 text-sm">
+                    ({filteredCampaigns.length} of {campaigns.length} campaigns shown)
+                  </span>
+                )}
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {campaigns.length === 0 ? (
@@ -200,6 +363,23 @@ export default function CampaignsPage() {
               <p className="text-muted-foreground mt-2">
                 Get started by creating your first campaign
               </p>
+            </div>
+          ) : filteredCampaigns.length === 0 ? (
+            <div className="text-center py-8">
+              <h3 className="text-lg font-semibold">No campaigns match your filters</h3>
+              <p className="text-muted-foreground mt-2">
+                Try adjusting your filters or clearing them to see more campaigns
+              </p>
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="mt-3"
+                >
+                  Clear Filters
+                </Button>
+              )}
             </div>
           ) : (
             <Table>
@@ -216,7 +396,7 @@ export default function CampaignsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {campaigns.map((campaign) => (
+                {filteredCampaigns.map((campaign) => (
                   <TableRow key={campaign.id}>
                     <TableCell className="font-medium">{campaign.name}</TableCell>
                     <TableCell>

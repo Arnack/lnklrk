@@ -76,8 +76,8 @@ export async function getCampaignById(id: string): Promise<CampaignWithInfluence
       deliverables: row.deliverables || [],
       performance: row.performance || {},
       notes: row.notes,
-      createdAt: row.created_at?.toISOString(),
-      updatedAt: row.updated_at?.toISOString(),
+      createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+      updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
       influencer: {
         id: row.influencer_id,
         handle: row.handle,
@@ -226,8 +226,8 @@ export async function addInfluencerToCampaign(data: Omit<CampaignInfluencer, 'id
       deliverables: row.deliverables || [],
       performance: row.performance || {},
       notes: row.notes,
-      createdAt: row.created_at?.toISOString(),
-      updatedAt: row.updated_at?.toISOString(),
+      createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+      updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
     };
   } catch (error) {
     console.error('Failed to add influencer to campaign:', error);
@@ -264,8 +264,8 @@ export async function updateCampaignInfluencer(id: string, data: Partial<Campaig
       deliverables: row.deliverables || [],
       performance: row.performance || {},
       notes: row.notes,
-      createdAt: row.created_at?.toISOString(),
-      updatedAt: row.updated_at?.toISOString(),
+      createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+      updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
     };
   } catch (error) {
     console.error('Failed to update campaign influencer:', error);
@@ -310,14 +310,14 @@ export async function getInfluencerCampaigns(influencerId: string): Promise<Camp
       deliverables: row.deliverables || [],
       performance: row.performance || {},
       notes: row.notes,
-      createdAt: row.created_at?.toISOString(),
-      updatedAt: row.updated_at?.toISOString(),
+      createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+      updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
       campaign: {
         id: row.campaign_id,
         name: row.campaign_name,
         status: row.campaign_status,
-        startDate: row.start_date?.toISOString(),
-        endDate: row.end_date?.toISOString(),
+        startDate: row.start_date ? new Date(row.start_date).toISOString() : new Date().toISOString(),
+        endDate: row.end_date ? new Date(row.end_date).toISOString() : new Date().toISOString(),
       } as any,
     }));
   } catch (error) {

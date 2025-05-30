@@ -87,7 +87,7 @@ export async function getInfluencerById(id: string) {
     const result = await sql`
       SELECT * FROM influencers WHERE id = ${id} LIMIT 1
     `;
-    console.log('Influencer query result:', result);
+    // console.log('Influencer query result:', result);
     return result[0];
   } catch (error) {
     console.error('Failed to fetch influencer:', error);

@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import type { CampaignInfluencer } from "@/types/campaign"
 import type { Influencer } from "@/types/influencer"
 import { Plus, Loader2, Search } from "lucide-react"
+import LS from "@/app/service/LS"
 
 interface AddInfluencerToCampaignProps {
   campaignId: string
@@ -49,7 +50,11 @@ export function AddInfluencerToCampaign({ campaignId, onInfluencerAdded }: AddIn
   const fetchInfluencers = async () => {
     try {
       setIsLoadingInfluencers(true)
-      const response = await fetch('/api/influencers')
+      const response = await fetch('/api/influencers', {
+        headers: {
+          'x-user-id': LS.getUserId() || '',
+        },
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch influencers')
       }

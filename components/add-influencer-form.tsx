@@ -148,6 +148,7 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': userId,
         },
         body: JSON.stringify(influencerData),
       })

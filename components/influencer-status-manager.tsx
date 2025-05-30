@@ -40,7 +40,7 @@ export function InfluencerStatusManager({ campaignInfluencer, onUpdate, onRemove
   const [formData, setFormData] = useState({
     status: campaignInfluencer.status,
     rate: campaignInfluencer.rate?.toString() || '',
-    performanceRating: campaignInfluencer.performanceRating?.toString() || '',
+    performanceRating: campaignInfluencer.performanceRating?.toString() || '0',
     notes: campaignInfluencer.notes || '',
   })
 
@@ -60,7 +60,7 @@ export function InfluencerStatusManager({ campaignInfluencer, onUpdate, onRemove
           campaignInfluencerId: campaignInfluencer.id,
           status: formData.status,
           rate: formData.rate ? parseFloat(formData.rate) : undefined,
-          performanceRating: formData.performanceRating ? parseInt(formData.performanceRating) : undefined,
+          performanceRating: formData.performanceRating && formData.performanceRating !== '0' ? parseInt(formData.performanceRating) : undefined,
           notes: formData.notes || undefined,
         }),
       })
@@ -115,7 +115,7 @@ export function InfluencerStatusManager({ campaignInfluencer, onUpdate, onRemove
     setFormData({
       status: campaignInfluencer.status,
       rate: campaignInfluencer.rate?.toString() || '',
-      performanceRating: campaignInfluencer.performanceRating?.toString() || '',
+      performanceRating: campaignInfluencer.performanceRating?.toString() || '0',
       notes: campaignInfluencer.notes || '',
     })
     setError(null)
@@ -204,14 +204,14 @@ export function InfluencerStatusManager({ campaignInfluencer, onUpdate, onRemove
               <div className="grid gap-2">
                 <Label htmlFor="edit-performance">Performance Rating (1-5)</Label>
                 <Select
-                  value={formData.performanceRating}
-                  onValueChange={(value) => setFormData({ ...formData, performanceRating: value })}
+                  value={formData.performanceRating || "0"}
+                  onValueChange={(value) => setFormData({ ...formData, performanceRating: value === "0" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select rating" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No rating</SelectItem>
+                    <SelectItem value="0">No rating</SelectItem>
                     <SelectItem value="1">⭐ (1/5)</SelectItem>
                     <SelectItem value="2">⭐⭐ (2/5)</SelectItem>
                     <SelectItem value="3">⭐⭐⭐ (3/5)</SelectItem>
