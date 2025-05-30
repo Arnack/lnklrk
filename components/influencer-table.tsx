@@ -19,17 +19,19 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
-import { Instagram, Youtube, Twitch, Twitter, Trash2, AlertTriangle, Loader2, ChevronUp, ChevronDown } from "lucide-react"
+import { Instagram, Youtube, Twitch, Twitter, Trash2, AlertTriangle, Loader2, ChevronUp, ChevronDown, ExternalLink } from "lucide-react"
+import { type ColumnKey } from "@/components/column-selector"
 
 interface InfluencerTableProps {
   influencers: Influencer[]
   onDelete: (ids: string[]) => void
+  visibleColumns: Record<ColumnKey, boolean>
 }
 
-type SortField = 'handle' | 'platform' | 'followers' | 'rate' | 'engagement_rate'
+type SortField = 'handle' | 'platform' | 'followers' | 'rate' | 'engagement_rate' | 'profile_link'
 type SortDirection = 'asc' | 'desc' | null
 
-export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps) {
+export function InfluencerTable({ influencers, onDelete, visibleColumns }: InfluencerTableProps) {
   const router = useRouter()
   const parentRef = useRef<HTMLDivElement>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -187,9 +189,27 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
     tags: "160px",
     engagement: "110px",
     demographics: "150px",
+    profile_link: "200px",
   }
 
-  const gridCols = `${columnWidths.checkbox} ${columnWidths.handle} ${columnWidths.platform} ${columnWidths.followers} ${columnWidths.rate} ${columnWidths.category} ${columnWidths.tags} ${columnWidths.engagement} ${columnWidths.demographics}`
+  // Create dynamic grid columns based on visibility
+  const getVisibleColumnWidths = () => {
+    const widths = [columnWidths.checkbox] // Checkbox is always visible
+    
+    if (visibleColumns.handle) widths.push(columnWidths.handle)
+    if (visibleColumns.platform) widths.push(columnWidths.platform)
+    if (visibleColumns.followers) widths.push(columnWidths.followers)
+    if (visibleColumns.rate) widths.push(columnWidths.rate)
+    if (visibleColumns.category) widths.push(columnWidths.category)
+    if (visibleColumns.tags) widths.push(columnWidths.tags)
+    if (visibleColumns.engagement) widths.push(columnWidths.engagement)
+    if (visibleColumns.demographics) widths.push(columnWidths.demographics)
+    if (visibleColumns.profile_link) widths.push(columnWidths.profile_link)
+    
+    return widths.join(' ')
+  }
+
+  const gridCols = getVisibleColumnWidths()
 
   return (
     <div>
@@ -218,44 +238,63 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                 aria-label="Select all"
               />
             </div>
-            <button 
-              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
-              onClick={() => handleSort('handle')}
-            >
-              <span>Handle</span>
-              {getSortIcon('handle')}
-            </button>
-            <button 
-              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
-              onClick={() => handleSort('platform')}
-            >
-              <span>Platform</span>
-              {getSortIcon('platform')}
-            </button>
-            <button 
-              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
-              onClick={() => handleSort('followers')}
-            >
-              <span>Followers</span>
-              {getSortIcon('followers')}
-            </button>
-            <button 
-              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
-              onClick={() => handleSort('rate')}
-            >
-              <span>Rate</span>
-              {getSortIcon('rate')}
-            </button>
-            <div>Category</div>
-            <div>Tags</div>
-            <button 
-              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
-              onClick={() => handleSort('engagement_rate')}
-            >
-              <span>Engagement</span>
-              {getSortIcon('engagement_rate')}
-            </button>
-            <div>Demographics</div>
+            {visibleColumns.handle && (
+              <button 
+                className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+                onClick={() => handleSort('handle')}
+              >
+                <span>Handle</span>
+                {getSortIcon('handle')}
+              </button>
+            )}
+            {visibleColumns.platform && (
+              <button 
+                className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+                onClick={() => handleSort('platform')}
+              >
+                <span>Platform</span>
+                {getSortIcon('platform')}
+              </button>
+            )}
+            {visibleColumns.followers && (
+              <button 
+                className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+                onClick={() => handleSort('followers')}
+              >
+                <span>Followers</span>
+                {getSortIcon('followers')}
+              </button>
+            )}
+            {visibleColumns.rate && (
+              <button 
+                className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+                onClick={() => handleSort('rate')}
+              >
+                <span>Rate</span>
+                {getSortIcon('rate')}
+              </button>
+            )}
+            {visibleColumns.category && <div>Category</div>}
+            {visibleColumns.tags && <div>Tags</div>}
+            {visibleColumns.engagement && (
+              <button 
+                className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+                onClick={() => handleSort('engagement_rate')}
+              >
+                <span>Engagement</span>
+                {getSortIcon('engagement_rate')}
+              </button>
+            )}
+            {visibleColumns.demographics && <div>Demographics</div>}
+            {visibleColumns.profile_link && (
+              <button 
+                className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+                onClick={() => handleSort('profile_link')}
+              >
+                <span>Profile Link</span>
+                {getSortIcon('profile_link')}
+              </button>
+            )}
           </div>
 
           {/* Virtual Content */}
@@ -280,48 +319,82 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
-                  <div className="font-medium truncate pr-2">{influencer.handle}</div>
-                  <div className="flex items-center gap-1 truncate pr-2">
-                    {getPlatformIcon(influencer.platform)}
-                    <span className="truncate">{influencer.platform}</span>
-                  </div>
-                  <div className="truncate pr-2">{formatNumber(influencer.followers)}</div>
-                  <div className="truncate pr-2">${influencer.rate}</div>
-                  <div className="pr-2">
-                    <div className="flex flex-wrap gap-1">
-                      {influencer.categories.slice(0, 2).map((category, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">
-                          {category}
-                        </Badge>
-                      ))}
-                      {influencer.categories.length > 2 && (
-                        <Badge variant="outline" className="text-xs">+{influencer.categories.length - 2}</Badge>
-                      )}
+                  {visibleColumns.handle && (
+                    <div className="font-medium truncate pr-2">{influencer.handle}</div>
+                  )}
+                  {visibleColumns.platform && (
+                    <div className="flex items-center gap-1 truncate pr-2">
+                      {getPlatformIcon(influencer.platform)}
+                      <span className="truncate">{influencer.platform}</span>
                     </div>
-                  </div>
-                  <div className="pr-2">
-                    <div className="flex flex-wrap gap-1">
-                      {influencer.tags && influencer.tags.length > 0 ? (
-                        <>
-                          {influencer.tags.slice(0, 2).map((tag, i) => (
-                            <Badge key={i} variant="default" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {influencer.tags.length > 2 && (
-                            <Badge variant="default" className="text-xs">+{influencer.tags.length - 2}</Badge>
-                          )}
-                        </>
+                  )}
+                  {visibleColumns.followers && (
+                    <div className="truncate pr-2">{formatNumber(influencer.followers)}</div>
+                  )}
+                  {visibleColumns.rate && (
+                    <div className="truncate pr-2">${influencer.rate}</div>
+                  )}
+                  {visibleColumns.category && (
+                    <div className="pr-2">
+                      <div className="flex flex-wrap gap-1">
+                        {influencer.categories.slice(0, 2).map((category, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {category}
+                          </Badge>
+                        ))}
+                        {influencer.categories.length > 2 && (
+                          <Badge variant="outline" className="text-xs">+{influencer.categories.length - 2}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {visibleColumns.tags && (
+                    <div className="pr-2">
+                      <div className="flex flex-wrap gap-1">
+                        {influencer.tags && influencer.tags.length > 0 ? (
+                          <>
+                            {influencer.tags.slice(0, 2).map((tag, i) => (
+                              <Badge key={i} variant="default" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {influencer.tags.length > 2 && (
+                              <Badge variant="default" className="text-xs">+{influencer.tags.length - 2}</Badge>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No tags</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {visibleColumns.engagement && (
+                    <div className="truncate pr-2">{influencer.engagement_rate}%</div>
+                  )}
+                  {visibleColumns.demographics && (
+                    <div className="text-xs pr-2">
+                      <div className="truncate">{influencer.followers_age}</div>
+                      <div className="truncate">{influencer.followers_sex}</div>
+                    </div>
+                  )}
+                  {visibleColumns.profile_link && (
+                    <div className="truncate pr-2">
+                      {influencer.profile_link ? (
+                        <a 
+                          href={influencer.profile_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1 text-primary hover:underline text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {influencer.profile_link}
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                        </a>
                       ) : (
-                        <span className="text-xs text-muted-foreground">No tags</span>
+                        <span className="text-xs text-muted-foreground">No link</span>
                       )}
                     </div>
-                  </div>
-                  <div className="truncate pr-2">{influencer.engagement_rate}%</div>
-                  <div className="text-xs pr-2">
-                    <div className="truncate">{influencer.followers_age}</div>
-                    <div className="truncate">{influencer.followers_sex}</div>
-                  </div>
+                  )}
                 </div>
               )
             })}

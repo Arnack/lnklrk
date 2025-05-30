@@ -5,6 +5,7 @@ import { InfluencerTable } from "@/components/influencer-table"
 import { FilterBar } from "@/components/filter-bar"
 import { ImportExportButtons } from "@/components/import-export-buttons"
 import { AddInfluencerForm } from "@/components/add-influencer-form"
+import { ColumnSelector, type ColumnKey, defaultColumns } from "@/components/column-selector"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
 import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
@@ -14,6 +15,15 @@ export default function DashboardPage() {
   const [influencers, setInfluencers] = useState<Influencer[]>([])
   const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Initialize visible columns state
+  const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>(() => {
+    const initial: Record<ColumnKey, boolean> = {} as Record<ColumnKey, boolean>
+    defaultColumns.forEach(col => {
+      initial[col.key] = col.defaultVisible
+    })
+    return initial
+  })
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +70,13 @@ export default function DashboardPage() {
     }
   }
 
+  const handleColumnToggle = useCallback((column: ColumnKey, visible: boolean) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [column]: visible
+    }))
+  }, [])
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -76,6 +93,10 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Manage your influencers and campaigns in one place</p>
         </div>
         <div className="flex items-center gap-2">
+          <ColumnSelector 
+            visibleColumns={visibleColumns} 
+            onColumnToggle={handleColumnToggle} 
+          />
           <AddInfluencerForm onInfluencerAdded={handleInfluencerAdded} />
           <ImportExportButtons onDataUpdate={handleDataUpdate} />
         </div>
@@ -83,7 +104,11 @@ export default function DashboardPage() {
 
       <FilterBar influencers={influencers} onFilterChange={handleFilterChange} />
 
-      <InfluencerTable influencers={filteredInfluencers} onDelete={handleDeleteInfluencers} />
+      <InfluencerTable 
+        influencers={filteredInfluencers} 
+        onDelete={handleDeleteInfluencers}
+        visibleColumns={visibleColumns}
+      />
     </div>
   )
 }
