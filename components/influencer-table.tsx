@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
-import { Instagram, Youtube, Twitch, Twitter, Trash2, AlertTriangle, Loader2, ChevronUp, ChevronDown, ExternalLink } from "lucide-react"
+import { Instagram, Youtube, Twitch, Twitter, Trash2, AlertTriangle, Loader2, ChevronUp, ChevronDown, ExternalLink, Copy } from "lucide-react"
 import { type ColumnKey } from "@/components/column-selector"
 
 interface InfluencerTableProps {
@@ -380,6 +380,7 @@ export function InfluencerTable({ influencers, onDelete, visibleColumns }: Influ
                   {visibleColumns.profile_link && (
                     <div className="truncate pr-2">
                       {influencer.profile_link ? (
+                        <>
                         <a 
                           href={influencer.profile_link} 
                           target="_blank" 
@@ -389,7 +390,20 @@ export function InfluencerTable({ influencers, onDelete, visibleColumns }: Influ
                         >
                           {influencer.profile_link}
                           <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                          
                         </a>
+                        {/* <Button
+                        variant="ghost" 
+                        size="icon"
+                        className="h-5 w-5 p-0 ml-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(influencer.profile_link);
+                        }}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button> */}
+                        </>
                       ) : (
                         <span className="text-xs text-muted-foreground">No link</span>
                       )}

@@ -29,6 +29,7 @@ export function UserMenu() {
     } finally {
       // Always clear client-side data regardless of server response
       logout()
+      router.push('/login')
     }
   }
 

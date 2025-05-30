@@ -178,9 +178,9 @@ export function LoginForm() {
         .animate-spin-very-fast { animation: spin-very-fast 1.5s linear infinite; }
       `}</style>
       
-      <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
+      <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
         {/* Theme Toggle */}
-        <div className="absolute top-6 right-6 z-30">
+        <div className="absolute top-4 right-4 lg:top-6 lg:right-6 z-30">
           <ThemeToggle />
         </div>
 
@@ -200,21 +200,21 @@ export function LoginForm() {
         </div>
 
         {/* Left Column - Welcome Section with Solar System */}
-        <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-100 dark:bg-slate-800">
+        <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-100 dark:bg-slate-800 py-8 px-4 lg:py-0">
           {/* Welcome Text */}
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 font-mono">
+          <div className="text-center mb-4 lg:mb-6">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-4 font-mono">
               Chinny CRM
             </h1>
-            <p className="text-blue-600 dark:text-blue-400 text-lg font-light max-w-sm">
+            <p className="text-blue-600 dark:text-blue-400 text-sm sm:text-base lg:text-lg font-light max-w-sm px-4">
               Orchestrating influencer relationships with precision and clarity
             </p>
           </div>
 
-          <div className="relative w-[600px] h-[600px]">
+          <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px]">
             {/* Central Sun */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="w-8 h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50 animate-pulse">
+              <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50 animate-pulse">
                 <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20"></div>
               </div>
             </div>
@@ -224,9 +224,9 @@ export function LoginForm() {
               className="absolute"
               style={{ top: "calc(50% - 1px)", left: "calc(50% - 2px)", transform: "translate(-50%, -50%)" }}
             >
-              <div className="w-32 h-32 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slow">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slow">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 bg-gray-400 rounded-full"></div>
                 </div>
               </div>
             </div>
@@ -236,9 +236,9 @@ export function LoginForm() {
               className="absolute"
               style={{ top: "calc(50% + -2px)", left: "calc(50% + 1px)", transform: "translate(-50%, -50%)" }}
             >
-              <div className="w-48 h-48 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slower">
+              <div className="w-24 h-24 sm:w-36 sm:h-36 lg:w-48 lg:h-48 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slower">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-3 h-3 bg-orange-300 rounded-full"></div>
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-3 lg:h-3 bg-orange-300 rounded-full"></div>
                 </div>
               </div>
             </div>
@@ -248,14 +248,14 @@ export function LoginForm() {
               className="absolute"
               style={{ top: "calc(50% + -1px)", left: "calc(50% - 3px)", transform: "translate(-50%, -50%)" }}
             >
-              <div className="w-64 h-64 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slowest">
+              <div className="w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slowest">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-3 h-3 bg-blue-400 rounded-full relative">
-                    {/* Moon */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-6 h-6 animate-spin-fast">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-3 lg:h-3 bg-blue-400 rounded-full relative">
+                    {/* Moon - only show on larger screens */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden sm:block">
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 animate-spin-fast">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                          <div className="w-0.5 h-0.5 sm:w-0.5 sm:h-0.5 lg:w-1 lg:h-1 bg-gray-300 rounded-full"></div>
                         </div>
                       </div>
                     </div>
@@ -269,19 +269,18 @@ export function LoginForm() {
               className="absolute"
               style={{ top: "calc(50% + 2px)", left: "calc(50% + 2px)", transform: "translate(-50%, -50%)" }}
             >
-              <div className="w-80 h-80 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-very-slow">
+              <div className="w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-very-slow">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-2.5 h-2.5 bg-red-400 rounded-full relative">
-                    {/* Phobos - closer, faster moon */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2.5 lg:h-2.5 bg-red-400 rounded-full relative">
+                    {/* Mars moons - only show on larger screens */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
                       <div className="w-4 h-4 animate-spin-very-fast">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                           <div className="w-0.5 h-0.5 bg-gray-400 rounded-full"></div>
                         </div>
                       </div>
                     </div>
-                    {/* Deimos - farther, slower moon */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
                       <div className="w-6 h-6 animate-spin-medium">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                           <div className="w-0.5 h-0.5 bg-gray-500 rounded-full"></div>
@@ -293,15 +292,15 @@ export function LoginForm() {
               </div>
             </div>
 
-            {/* Jupiter Orbit */}
+            {/* Jupiter Orbit - only show on larger screens */}
             <div
-              className="absolute"
+              className="absolute hidden lg:block"
               style={{ top: "calc(50% + -3px)", left: "calc(50% - 1px)", transform: "translate(-50%, -50%)" }}
             >
               <div className="w-96 h-96 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-ultra-slow">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                   <div className="w-4 h-4 bg-orange-600 rounded-full relative">
-                    {/* Io - innermost Galilean moon */}
+                    {/* Jupiter moons */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="w-5 h-5 animate-spin-fast">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -309,7 +308,6 @@ export function LoginForm() {
                         </div>
                       </div>
                     </div>
-                    {/* Europa */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="w-6 h-6 animate-spin-medium">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -317,7 +315,6 @@ export function LoginForm() {
                         </div>
                       </div>
                     </div>
-                    {/* Ganymede */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="w-7 h-7 animate-spin-slow">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -325,7 +322,6 @@ export function LoginForm() {
                         </div>
                       </div>
                     </div>
-                    {/* Callisto - outermost */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="w-8 h-8 animate-spin-slower">
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -340,38 +336,38 @@ export function LoginForm() {
           </div>
 
           {/* Feature Icons */}
-          <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <div className="mt-4 lg:mt-6 flex items-center justify-center gap-4 lg:gap-6 text-xs sm:text-sm text-gray-600 dark:text-slate-400">
+            <div className="flex items-center gap-1 lg:gap-2">
+              <Users className="w-3 h-3 lg:w-4 lg:h-4 text-blue-600 dark:text-blue-400" />
               <span>Influencers</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <div className="flex items-center gap-1 lg:gap-2">
+              <Target className="w-3 h-3 lg:w-4 lg:h-4 text-purple-600 dark:text-purple-400" />
               <span>Campaigns</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <div className="flex items-center gap-1 lg:gap-2">
+              <Zap className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 dark:text-green-400" />
               <span>Analytics</span>
             </div>
           </div>
         </div>
 
         {/* Right Column - Form Section */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
           <div className="w-full max-w-md">
             {/* Form Header */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-6 lg:mb-8">
               
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-mono">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 font-mono">
                 {getFormTitle()}
               </h2>
-              <p className="text-gray-600 dark:text-slate-400 text-sm font-light">
+              <p className="text-gray-600 dark:text-slate-400 text-xs sm:text-sm font-light">
                 {getFormSubtitle()}
               </p>
             </div>
 
             {/* Form Container */}
-            <div className="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm border border-blue-500/20 dark:border-blue-400/20 rounded-lg p-6 relative">
+            <div className="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm border border-blue-500/20 dark:border-blue-400/20 rounded-lg p-4 sm:p-6 relative">
               {/* Corner accents */}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-600/50 dark:border-blue-400/50"></div>
               <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-600/50 dark:border-blue-400/50"></div>
@@ -582,8 +578,8 @@ export function LoginForm() {
             </div>
 
             {/* Footer */}
-            <div className="text-center mt-6">
-              <p className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider">
+            <div className="text-center mt-4 sm:mt-6">
+              <p className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider px-4">
                 Created with ⌨️ & ❤️ by <a href="https://linklurk.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Greg</a>
               </p>
             </div>
