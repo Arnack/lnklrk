@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, uuid, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp, uuid, jsonb, boolean, numeric } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -6,6 +6,49 @@ export const users = pgTable('users', {
   password: text('password').notNull(), // This will store hashed passwords
   name: text('name').notNull(),
   isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const campaigns = pgTable('campaigns', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(), // Link to user who created the campaign
+  name: text('name').notNull(),
+  description: text('description'),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  budget: numeric('budget', { precision: 10, scale: 2 }), // Total campaign budget
+  status: text('status').notNull().default('draft'), // draft, active, completed, cancelled
+  briefUrl: text('brief_url'), // Link to campaign brief
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const campaignInfluencers = pgTable('campaign_influencers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  campaignId: uuid('campaign_id').references(() => campaigns.id, { onDelete: 'cascade' }).notNull(),
+  influencerId: uuid('influencer_id').references(() => influencers.id, { onDelete: 'cascade' }).notNull(),
+  status: text('status').notNull().default('contacted'), // contacted, confirmed, posted, paid
+  rate: numeric('rate', { precision: 10, scale: 2 }), // Individual rate for this influencer
+  performanceRating: integer('performance_rating'), // 1-5 rating
+  deliverables: jsonb('deliverables').$type<Array<{
+    type: string; // 'post', 'story', 'reel', 'video'
+    description: string;
+    completed: boolean;
+    deliveredAt?: string;
+    url?: string;
+  }>>(),
+  performance: jsonb('performance').$type<{
+    impressions?: number;
+    engagement?: number;
+    clicks?: number;
+    conversions?: number;
+    reach?: number;
+    saves?: number;
+    shares?: number;
+  }>(),
+  notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

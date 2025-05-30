@@ -5,10 +5,9 @@ import { InfluencerTable } from "@/components/influencer-table"
 import { FilterBar } from "@/components/filter-bar"
 import { ImportExportButtons } from "@/components/import-export-buttons"
 import { AddInfluencerForm } from "@/components/add-influencer-form"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { UserMenu } from "@/components/user-menu"
-import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
+import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
@@ -77,10 +76,8 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Manage your influencers and campaigns in one place</p>
         </div>
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           <AddInfluencerForm onInfluencerAdded={handleInfluencerAdded} />
           <ImportExportButtons onDataUpdate={handleDataUpdate} />
-          <UserMenu />
         </div>
       </div>
 

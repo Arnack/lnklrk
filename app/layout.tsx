@@ -4,7 +4,9 @@ import './globals.css'
 import { LanguageProvider } from '@/context/language-provider'
 import { AuthProvider } from '@/context/auth-provider'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Navbar } from '@/components/navbar'
 import { Toaster } from 'sonner'
+import { ConditionalNavbar } from '@/components/conditional-navbar'
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -25,7 +27,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <div className="relative flex min-h-screen flex-col">
-                {/* <Header /> */}
+                <ConditionalNavbar />
                 <main className="flex-1">{children}</main>
                 {/* <Footer /> */}
               </div>
