@@ -6,6 +6,8 @@ export const users = pgTable('users', {
   password: text('password').notNull(), // This will store hashed passwords
   name: text('name').notNull(),
   isActive: boolean('is_active').default(true),
+  googleClientId: text('google_client_id'), // Google OAuth Client ID for Gmail API
+  googleApiKey: text('google_api_key'), // Google API Key for Gmail API
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

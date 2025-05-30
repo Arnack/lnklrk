@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/context/auth-provider"
+import { useRouter } from "next/navigation"
 import LS from "@/app/service/LS"
 
 export function UserMenu() {
   const { logout } = useAuth()
+  const router = useRouter()
 
   const handleLogout = async () => {
     try {
@@ -29,6 +31,10 @@ export function UserMenu() {
       // Always clear client-side data regardless of server response
       logout()
     }
+  }
+
+  const handleSettingsClick = () => {
+    router.push('/settings')
   }
 
   // Get user information from localStorage
@@ -79,7 +85,7 @@ export function UserMenu() {
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem className="cursor-pointer" onClick={handleSettingsClick}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>

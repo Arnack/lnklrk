@@ -1,5 +1,7 @@
 "use client"
 
+import LS from "@/app/service/LS"
+
 declare global {
   interface Window {
     gapi: any;
@@ -22,7 +24,7 @@ export interface GmailMessage {
 
 export interface ParsedEmail {
   id: string
-  direction: "incoming" | "outgoing"
+  direction: 'incoming' | 'outgoing'
   subject: string
   content: string
   date: string
@@ -30,18 +32,86 @@ export interface ParsedEmail {
   to: string
 }
 
+interface CredentialsStatus {
+  hasEnvVars: boolean
+  hasDbCredentials: boolean
+  hasAnyCredentials: boolean
+}
+
 class GmailService {
   private tokenClient: any
   private gapiInited = false
   private gisInited = false
   private _isAuthenticated = false
+  private credentials: { googleClientId?: string; googleApiKey?: string } = {}
 
   constructor() {
     this.loadGoogleAPIs()
   }
 
+  async loadCredentials(): Promise<void> {
+    // First check environment variables
+    if (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
+      this.credentials = {
+        googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        googleApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY
+      }
+      return
+    }
+
+    // If no env vars, try to get from database
+    try {
+      const userId = LS.getUserId()
+      if (!userId) {
+        console.log('No user ID available for credentials lookup')
+        return
+      }
+
+      const response = await fetch(`/api/auth/user?userId=${userId}`)
+      if (response.ok) {
+        const userData = await response.json()
+        if (userData.googleClientId && userData.googleApiKey) {
+          this.credentials = {
+            googleClientId: userData.googleClientId,
+            googleApiKey: userData.googleApiKey
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load credentials from database:', error)
+    }
+  }
+
+  getCredentialsStatus(): CredentialsStatus {
+    const hasEnvVars = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && process.env.NEXT_PUBLIC_GOOGLE_API_KEY)
+    const hasDbCredentials = Boolean(this.credentials.googleClientId && this.credentials.googleApiKey)
+    
+    return {
+      hasEnvVars,
+      hasDbCredentials,
+      hasAnyCredentials: hasEnvVars || hasDbCredentials
+    }
+  }
+
+  async refreshCredentials(): Promise<void> {
+    await this.loadCredentials()
+    // Re-initialize if we got new credentials
+    if (this.credentials.googleClientId && this.credentials.googleApiKey) {
+      this.loadGoogleAPIs()
+    }
+  }
+
   private async loadGoogleAPIs() {
     if (typeof window === 'undefined') return
+
+    // Load credentials first
+    await this.loadCredentials()
+
+    // Check if we have credentials before proceeding
+    if (!this.credentials.googleClientId || !this.credentials.googleApiKey) {
+      console.log('No Gmail API credentials available')
+      return
+    }
 
     // Load Google API script
     if (!window.gapi) {
@@ -73,8 +143,13 @@ class GmailService {
   }
 
   private async initializeGapiClient() {
+    if (!this.credentials.googleApiKey) {
+      console.error('No Google API Key available')
+      return
+    }
+
     await window.gapi.client.init({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+      apiKey: this.credentials.googleApiKey,
       discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
     })
     this.gapiInited = true
@@ -82,8 +157,13 @@ class GmailService {
   }
 
   private gisLoaded() {
+    if (!this.credentials.googleClientId) {
+      console.error('No Google Client ID available')
+      return
+    }
+
     this.tokenClient = window.google.accounts.oauth2.initTokenClient({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      client_id: this.credentials.googleClientId,
       scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send',
       callback: (resp: any) => {
         if (resp.error !== undefined) {
@@ -104,6 +184,15 @@ class GmailService {
   }
 
   async authenticate(): Promise<void> {
+    // Check if we have credentials first
+    if (!this.credentials.googleClientId || !this.credentials.googleApiKey) {
+
+      console.log('>>> ?:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
+      console.log('>>> ?:', process.env.NEXT_PUBLIC_GOOGLE_API_KEY)
+
+      throw new Error('Gmail API credentials not configured. Please configure them in Settings.')
+    }
+
     return new Promise((resolve, reject) => {
       if (!this.tokenClient) {
         reject(new Error('Google Identity Services not loaded'))

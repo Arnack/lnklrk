@@ -29,6 +29,7 @@ import {
   Link,
   Download,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   FileText,
   Wand2
@@ -44,6 +45,7 @@ import {
   extractVariables,
   type EmailTemplate 
 } from "@/lib/email-templates"
+import { GmailSetupAlert } from "@/components/gmail-setup-alert"
 
 interface Message {
   id: string
@@ -256,182 +258,192 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
     })
   }
 
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between">
-        <div>
-          <CardTitle className="flex items-center gap-2">
-            Message Log
-            {influencerEmail && (
-              <Badge variant="outline" className="text-xs">
-                <Mail className="h-3 w-3 mr-1" />
-                {influencerEmail}
-              </Badge>
-            )}
-            {isAuthenticated && (
-              <Badge variant="secondary" className="text-xs">
-                <Link className="h-3 w-3 mr-1" />
-                Gmail Connected
-              </Badge>
-            )}
-          </CardTitle>
-          <CardDescription>Track conversations with this influencer</CardDescription>
-        </div>
-        <div className="flex gap-2">
-          {!isAuthenticated ? (
-            <Button onClick={authenticate} size="sm" disabled={isLoading}>
-              <Link className="h-4 w-4 mr-2" />
-              Connect Gmail
-            </Button>
-          ) : (
-            <>
-              <Button 
-                onClick={handleFetchEmails} 
-                size="sm" 
-                variant="outline"
-                disabled={isLoading || !influencerEmail}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Sync Emails"}
-              </Button>
-              <Button 
-                onClick={() => setIsSendingEmail(true)} 
-                size="sm"
-                disabled={!influencerEmail}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                Send Email
-              </Button>
-            </>
-          )}
-          <Button onClick={() => setIsAddingMessage(true)} size="sm" variant="outline">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Message
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {error && (
-          <div className="p-3 border border-red-200 bg-red-50 rounded-md text-sm text-red-600">
-            {error}
-          </div>
-        )}
+  const getTemplatesByCategories = () => {
+    const categories: Record<string, EmailTemplate[]> = {}
+    emailTemplates.forEach(template => {
+      if (!categories[template.category]) {
+        categories[template.category] = []
+      }
+      categories[template.category].push(template)
+    })
+    return categories
+  }
 
-        {messages.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <div>No messages logged yet</div>
-            {influencerEmail && !isAuthenticated && (
-              <p className="text-sm mt-2">Connect Gmail to automatically sync conversations</p>
-            )}
+  return (
+    <div className="space-y-4">
+      <GmailSetupAlert />
+      
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              Message Log
+              {influencerEmail && (
+                <Badge variant="outline" className="text-xs">
+                  <Mail className="h-3 w-3 mr-1" />
+                  {influencerEmail}
+                </Badge>
+              )}
+              {isAuthenticated && (
+                <Badge variant="secondary" className="text-xs">
+                  <Link className="h-3 w-3 mr-1" />
+                  Gmail Connected
+                </Badge>
+              )}
+            </CardTitle>
+            <CardDescription>Track conversations with this influencer</CardDescription>
           </div>
-        ) : (
-          <div className="space-y-4 max-h-[600px] overflow-y-auto p-4 bg-gradient-to-b from-muted/20 to-background rounded-lg">
-            {messages.map((message) => {
-              const isExpanded = expandedMessages.has(message.id)
-              const needsTruncation = message.content.length > 150
-              const isIncoming = message.direction === "incoming"
-              
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${isIncoming ? 'justify-start' : 'justify-end'} mb-4 group`}
+          <div className="flex gap-2">
+            {!isAuthenticated ? (
+              <Button onClick={authenticate} size="sm" disabled={isLoading}>
+                <Link className="h-4 w-4 mr-2" />
+                Connect Gmail
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  onClick={handleFetchEmails} 
+                  size="sm" 
+                  variant="outline"
+                  disabled={isLoading || !influencerEmail}
                 >
-                  <div className={`flex ${isIncoming ? 'flex-row' : 'flex-row-reverse'} items-end max-w-[80%] gap-2`}>
-                    {/* Avatar */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
-                      isIncoming 
-                        ? 'bg-green-100 text-green-700 border-2 border-green-200' 
-                        : 'bg-blue-100 text-blue-700 border-2 border-blue-200'
-                    }`}>
-                      {isIncoming ? (influencerName?.[0]?.toUpperCase() || 'T') : 'Y'}
-                    </div>
-                    
-                    {/* Message Bubble */}
-                    <div className={`relative rounded-2xl px-4 py-3 shadow-sm transition-all ${
-                      isIncoming 
-                        ? 'bg-white border border-border rounded-tl-sm dark:bg-gray-800 dark:border-gray-700' 
-                        : 'bg-primary text-primary-foreground rounded-tr-sm'
-                    }`}>
-                      {/* Message Header */}
-                      <div className={`flex items-center gap-2 mb-2 text-xs ${
-                        isIncoming ? 'justify-start' : 'justify-end'
-                      }`}>
-                        <div className={`font-medium ${
-                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/80'
+                  <Download className="h-4 w-4 mr-2" />
+                  {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Sync Emails"}
+                </Button>
+                <Button 
+                  onClick={() => setIsSendingEmail(true)} 
+                  size="sm"
+                  disabled={!influencerEmail}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+              </>
+            )}
+            <Button onClick={() => setIsAddingMessage(true)} size="sm" variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Message
+            </Button>
+          </div>
+        </CardHeader>
+        
+        <CardContent>
+          {error && (
+            <div className="p-3 border border-red-200 bg-red-50 rounded-md text-sm text-red-600 mb-4">
+              {error}
+            </div>
+          )}
+
+          {messages.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <div>No messages logged yet</div>
+              {influencerEmail && !isAuthenticated && (
+                <p className="text-sm mt-2">Connect Gmail to automatically sync conversations</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-[600px] overflow-y-auto p-4 bg-gradient-to-b from-muted/20 to-background rounded-lg">
+              {messages.map((message) => {
+                const isExpanded = expandedMessages.has(message.id)
+                const needsTruncation = message.content.length > 150
+                const isIncoming = message.direction === "incoming"
+
+                return (
+                  <div
+                    key={message.id}
+                    className={`group relative flex ${isIncoming ? 'justify-start' : 'justify-end'} mb-4`}
+                  >
+                    <div className={`max-w-[70%] ${isIncoming ? 'mr-12' : 'ml-12'}`}>
+                      <div
+                        className={`relative p-4 rounded-lg shadow-sm border ${
+                          isIncoming
+                            ? 'bg-white border-border text-foreground'
+                            : 'bg-primary text-primary-foreground'
+                        }`}
+                      >
+                        {/* Subject */}
+                        <div className={`font-medium text-sm mb-2 ${
+                          isIncoming ? 'text-foreground' : 'text-primary-foreground/90'
                         }`}>
                           {message.subject}
                         </div>
-                        <div className={`${
-                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/70'
+
+                        {/* Content */}
+                        <div className={`text-sm ${
+                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/80'
                         }`}>
-                          {formatDate(message.date)}
+                          {isExpanded || !needsTruncation ? (
+                            <div className="whitespace-pre-wrap">{message.content}</div>
+                          ) : (
+                            <div>{truncateContent(message.content)}</div>
+                          )}
                         </div>
-                      </div>
-                      
-                      {/* Message Content */}
-                      <div className={`text-sm leading-relaxed ${
-                        isIncoming ? 'text-foreground' : 'text-primary-foreground'
-                      }`}>
-                        <div className="whitespace-pre-wrap">
-                          {isExpanded || !needsTruncation 
-                            ? message.content 
-                            : truncateContent(message.content)
-                          }
-                        </div>
-                        
-                        {/* Expand/Collapse Controls */}
+
+                        {/* Show more/less button */}
                         {needsTruncation && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleMessageExpansion(message.id)}
-                              className={`h-6 px-2 text-xs ${
-                                isIncoming 
-                                  ? 'text-muted-foreground hover:text-foreground hover:bg-muted' 
-                                  : 'text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10'
-                              }`}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  Show less
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronRight className="h-3 w-3 mr-1" />
-                                  Show more
-                                </>
-                              )}
-                            </Button>
-                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleMessageExpansion(message.id)}
+                            className={`mt-2 h-6 px-2 text-xs ${
+                              isIncoming
+                                ? 'hover:bg-muted text-muted-foreground'
+                                : 'hover:bg-primary-foreground/10 text-primary-foreground/70'
+                            }`}
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="h-3 w-3 mr-1" />
+                                Show less
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-3 w-3 mr-1" />
+                                Show more
+                              </>
+                            )}
+                          </Button>
                         )}
+
+                        {/* Timestamp */}
+                        <div className={`text-xs mt-2 ${
+                          isIncoming ? 'text-muted-foreground' : 'text-primary-foreground/60'
+                        }`}>
+                          <Calendar className="h-3 w-3 inline mr-1" />
+                          {formatDate(message.date)}
+                          {isIncoming && (
+                            <ArrowDown className="h-3 w-3 inline ml-2 mr-1" />
+                          )}
+                          {!isIncoming && (
+                            <ArrowUp className="h-3 w-3 inline ml-2 mr-1" />
+                          )}
+                        </div>
+
+                        {/* Delete button */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteMessage(message.id)}
+                          className={`absolute -top-2 ${isIncoming ? '-right-2' : '-left-2'} h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
+                            isIncoming 
+                              ? 'bg-white border border-border hover:bg-muted text-muted-foreground' 
+                              : 'bg-primary-foreground text-primary hover:bg-primary-foreground/90'
+                          }`}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
-                      
-                      {/* Delete Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteMessage(message.id)}
-                        className={`absolute -top-2 ${isIncoming ? '-right-2' : '-left-2'} h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
-                          isIncoming 
-                            ? 'bg-white border border-border hover:bg-muted text-muted-foreground' 
-                            : 'bg-primary-foreground text-primary hover:bg-primary-foreground/90'
-                        }`}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-            
-            {/* Scroll to bottom spacer */}
-            <div className="h-1" />
-          </div>
-        )}
+                )
+              })}
+              
+              {/* Scroll to bottom spacer */}
+              <div className="h-1" />
+            </div>
+          )}
+        </CardContent>
 
         {/* Send Email Dialog */}
         <Dialog open={isSendingEmail} onOpenChange={(open) => {
@@ -462,59 +474,61 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
               </TabsList>
 
               <TabsContent value="templates" className="space-y-4">
-                {/* Template Categories */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {['collaboration', 'follow-up', 'contract', 'introduction'].map((category) => (
-                    <div key={category} className="space-y-2">
-                      <h4 className="font-medium text-sm capitalize">{category}</h4>
-                      <div className="space-y-1">
-                        {getTemplatesByCategory(category as EmailTemplate['category']).map((template) => (
-                          <Button
-                            key={template.id}
-                            variant={selectedTemplate?.id === template.id ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handleTemplateSelect(template.id)}
-                            className="w-full text-left justify-start h-auto p-2"
-                          >
-                            <div className="text-xs">
-                              {template.name}
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Template Variables */}
-                {selectedTemplate && (
-                  <div className="border rounded-lg p-4 bg-muted/30">
-                    <h4 className="font-medium mb-3 flex items-center gap-2">
-                      <Wand2 className="h-4 w-4" />
-                      Customize Template: {selectedTemplate.name}
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {extractVariables(selectedTemplate).map((variable) => (
-                        <div key={variable} className="space-y-1">
-                          <Label htmlFor={`var-${variable}`} className="text-xs">
-                            {variable.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                          </Label>
-                          <Input
-                            id={`var-${variable}`}
-                            value={templateVariables[variable] || ''}
-                            onChange={(e) => handleVariableChange(variable, e.target.value)}
-                            placeholder={`Enter ${variable}`}
-                            className="h-8 text-xs"
-                          />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm">Choose Template</h4>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {Object.entries(getTemplatesByCategories()).map(([category, templates]) => (
+                        <div key={category} className="space-y-1">
+                          <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {category}
+                          </h5>
+                          {templates.map((template) => (
+                            <Button
+                              key={template.id}
+                              variant={selectedTemplate?.id === template.id ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleTemplateSelect(template.id)}
+                              className="w-full justify-start text-left h-auto p-3"
+                            >
+                              <div>
+                                <div className="font-medium text-sm">{template.name}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {template.variables.slice(0, 3).join(', ')}
+                                  {template.variables.length > 3 && '...'}
+                                </div>
+                              </div>
+                            </Button>
+                          ))}
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
 
-                {/* Template Preview */}
+                  {selectedTemplate && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm">Template Variables</h4>
+                      <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                        {extractVariables(selectedTemplate).map((variable) => (
+                          <div key={variable} className="space-y-1">
+                            <Label htmlFor={variable} className="text-xs">
+                              {variable.charAt(0).toUpperCase() + variable.slice(1)}
+                            </Label>
+                            <Input
+                              id={variable}
+                              value={templateVariables[variable] || ''}
+                              onChange={(e) => handleVariableChange(variable, e.target.value)}
+                              placeholder={`Enter ${variable}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {selectedTemplate && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-4 border-t">
                     <div className="space-y-2">
                       <Label htmlFor="template-subject">Subject</Label>
                       <Input
@@ -526,13 +540,12 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="template-content">Content</Label>
+                      <Label htmlFor="template-content">Content Preview</Label>
                       <Textarea
                         id="template-content"
                         value={emailToSend.content}
                         onChange={(e) => setEmailToSend({ ...emailToSend, content: e.target.value })}
-                        placeholder="Email content"
-                        className="min-h-[300px] font-mono text-sm"
+                        className="min-h-[200px]"
                       />
                     </div>
                   </div>
@@ -590,44 +603,62 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Message</DialogTitle>
-              <DialogDescription>Manually log a conversation</DialogDescription>
+              <DialogDescription>
+                Manually add a message to the conversation log
+              </DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="message-direction">Direction</Label>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="direction">Direction</Label>
                 <Select
                   value={newMessage.direction}
-                  onValueChange={(value: "incoming" | "outgoing") => setNewMessage({ ...newMessage, direction: value })}
+                  onValueChange={(value: "incoming" | "outgoing") =>
+                    setNewMessage({ ...newMessage, direction: value })
+                  }
                 >
-                  <SelectTrigger id="message-direction">
-                    <SelectValue placeholder="Select direction" />
+                  <SelectTrigger>
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="incoming">Incoming (from influencer)</SelectItem>
-                    <SelectItem value="outgoing">Outgoing (to influencer)</SelectItem>
+                    <SelectItem value="outgoing">
+                      <div className="flex items-center">
+                        <ArrowUp className="h-4 w-4 mr-2" />
+                        Outgoing (You sent)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="incoming">
+                      <div className="flex items-center">
+                        <ArrowDown className="h-4 w-4 mr-2" />
+                        Incoming (You received)
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="message-subject">Subject</Label>
+              <div className="space-y-2">
+                <Label htmlFor="subject">Subject</Label>
                 <Input
-                  id="message-subject"
+                  id="subject"
                   placeholder="Message subject"
                   value={newMessage.subject}
-                  onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
+                  onChange={(e) =>
+                    setNewMessage({ ...newMessage, subject: e.target.value })
+                  }
                 />
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="message-content">Content</Label>
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
                 <Textarea
-                  id="message-content"
+                  id="content"
                   placeholder="Message content"
                   value={newMessage.content}
-                  onChange={(e) => setNewMessage({ ...newMessage, content: e.target.value })}
-                  className="min-h-[150px]"
+                  onChange={(e) =>
+                    setNewMessage({ ...newMessage, content: e.target.value })
+                  }
+                  className="min-h-[100px]"
                 />
               </div>
             </div>
@@ -640,7 +671,7 @@ export function MessageLog({ messages, onUpdate, influencerEmail, influencerName
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </CardContent>
-    </Card>
+      </Card>
+    </div>
   )
 }

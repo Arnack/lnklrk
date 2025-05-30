@@ -24,9 +24,19 @@ async function migrate() {
         password TEXT NOT NULL,
         name TEXT NOT NULL,
         is_active BOOLEAN DEFAULT true,
+        google_client_id TEXT,
+        google_api_key TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `;
+
+    console.log('Adding Gmail API columns to users table if they don\'t exist...');
+    await sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS google_client_id TEXT
+    `;
+    await sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS google_api_key TEXT
     `;
 
     console.log('Creating influencers table...');

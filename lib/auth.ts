@@ -10,6 +10,8 @@ export type User = {
   email: string;
   name: string;
   isActive: boolean;
+  googleClientId?: string;
+  googleApiKey?: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -41,6 +43,8 @@ export async function createUser(email: string, password: string, name: string):
       email: user.email,
       name: user.name,
       isActive: user.isActive ?? true,
+      googleClientId: user.googleClientId || undefined,
+      googleApiKey: user.googleApiKey || undefined,
       createdAt: user.createdAt ?? new Date(),
       updatedAt: user.updatedAt ?? new Date(),
     };
@@ -88,6 +92,8 @@ export async function authenticateUser(email: string, password: string): Promise
       email: user.email,
       name: user.name,
       isActive: user.isActive ?? true,
+      googleClientId: user.googleClientId || undefined,
+      googleApiKey: user.googleApiKey || undefined,
       createdAt: user.createdAt ?? new Date(),
       updatedAt: user.updatedAt ?? new Date(),
     };
@@ -118,6 +124,8 @@ export async function getUserById(id: string): Promise<User | null> {
       email: user.email,
       name: user.name,
       isActive: user.isActive ?? true,
+      googleClientId: user.googleClientId || undefined,
+      googleApiKey: user.googleApiKey || undefined,
       createdAt: user.createdAt ?? new Date(),
       updatedAt: user.updatedAt ?? new Date(),
     };
