@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -194,25 +194,60 @@ export function ReminderCalendar({
                 </div>
                 
                 <div className="space-y-1">
-                  {dayReminders.slice(0, 3).map((reminder) => (
-                    <div
-                      key={reminder.id}
-                      className={`
-                        text-xs p-1 rounded truncate cursor-pointer
-                        ${reminder.isCompleted ? 'opacity-60 line-through' : ''}
-                        ${reminder.isExpired && !reminder.isCompleted ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
-                          (reminder.priority || 'medium') === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                          (reminder.priority || 'medium') === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}
-                      `}
-                      title={`${reminder.title}${reminder.description ? ` - ${reminder.description}` : ''}`}
-                    >
-                      <div className="flex items-center gap-1">
-                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(reminder.priority || 'medium')}`}></div>
-                        <span className="truncate">{reminder.title}</span>
-                      </div>
-                    </div>
-                  ))}
+                  {dayReminders.slice(0, 3).map((reminder) => {
+                    const hasLink = (reminder.type === 'influencer' && reminder.influencerId) || 
+                                  (reminder.type === 'campaign' && reminder.campaignId)
+                    const linkHref = reminder.type === 'influencer' && reminder.influencerId 
+                      ? `/influencers/${reminder.influencerId}`
+                      : reminder.type === 'campaign' && reminder.campaignId
+                      ? `/campaigns/${reminder.campaignId}`
+                      : null
+                    
+                    const ReminderItem = ({ children }: { children: React.ReactNode }) => (
+                      hasLink && linkHref ? (
+                        <a
+                          href={linkHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`
+                            block text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 transition-opacity
+                            ${reminder.isCompleted ? 'opacity-60 line-through' : ''}
+                            ${reminder.isExpired && !reminder.isCompleted ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
+                              (reminder.priority || 'medium') === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                              (reminder.priority || 'medium') === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}
+                          `}
+                          title={`${reminder.title}${reminder.description ? ` - ${reminder.description}` : ''} (Click to view ${reminder.type})`}
+                        >
+                          {children}
+                        </a>
+                      ) : (
+                        <div
+                          className={`
+                            text-xs p-1 rounded truncate cursor-pointer
+                            ${reminder.isCompleted ? 'opacity-60 line-through' : ''}
+                            ${reminder.isExpired && !reminder.isCompleted ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
+                              (reminder.priority || 'medium') === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                              (reminder.priority || 'medium') === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}
+                          `}
+                          title={`${reminder.title}${reminder.description ? ` - ${reminder.description}` : ''}`}
+                        >
+                          {children}
+                        </div>
+                      )
+                    )
+
+                    return (
+                      <ReminderItem key={reminder.id}>
+                        <div className="flex items-center gap-1">
+                          <div className={`w-2 h-2 rounded-full ${getPriorityColor(reminder.priority || 'medium')}`}></div>
+                          <span className="truncate">{reminder.title}</span>
+                          {hasLink && <span className="text-blue-500">↗</span>}
+                        </div>
+                      </ReminderItem>
+                    )
+                  })}
                   
                   {dayReminders.length > 3 && (
                     <div className="text-xs text-muted-foreground">

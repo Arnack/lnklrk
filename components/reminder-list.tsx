@@ -32,6 +32,7 @@ interface Reminder {
   title: string
   description?: string
   expirationDate: string
+  
   priority: 'low' | 'medium' | 'high'
   type: 'general' | 'influencer' | 'campaign'
   isExpired: boolean
@@ -241,6 +242,31 @@ export function ReminderList({
                   <Badge variant="outline" className="capitalize">
                     {reminder.type || 'general'}
                   </Badge>
+                  
+                  {/* Add links to influencer or campaign if applicable */}
+                  {reminder.type === 'influencer' && reminder.influencerId && (
+                    <a
+                      href={`/influencers/${reminder.influencerId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                    >
+                      <User className="h-3 w-3" />
+                      View Influencer
+                    </a>
+                  )}
+                  
+                  {reminder.type === 'campaign' && reminder.campaignId && (
+                    <a
+                      href={`/campaigns/${reminder.campaignId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                    >
+                      <Megaphone className="h-3 w-3" />
+                      View Campaign
+                    </a>
+                  )}
                 </div>
               </div>
               

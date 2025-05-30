@@ -274,7 +274,7 @@ export async function getAllReminders(userId: string, options?: {
         ${options.limit ? sql`LIMIT ${options.limit}` : sql``}
       `;
       console.log('Reminders query result:', result);
-      return result;
+      return result.map(transformReminderData);
     } else {
       const result = await sql`
         SELECT * FROM reminders 
@@ -283,7 +283,7 @@ export async function getAllReminders(userId: string, options?: {
         ${options?.limit ? sql`LIMIT ${options.limit}` : sql``}
       `;
       console.log('Reminders query result:', result);
-      return result;
+      return result.map(transformReminderData);
     }
   } catch (error) {
     console.error('Failed to fetch reminders:', error);
@@ -297,7 +297,7 @@ export async function getReminderById(id: string, userId: string) {
     const result = await sql`
       SELECT * FROM reminders WHERE id = ${id} AND user_id = ${userId} LIMIT 1
     `;
-    return result[0];
+    return transformReminderData(result[0]);
   } catch (error) {
     console.error('Failed to fetch reminder:', error);
     throw error;
@@ -335,7 +335,7 @@ export async function createReminder(data: {
     `;
     
     console.log('Created reminder:', result);
-    return result[0];
+    return transformReminderData(result[0]);
   } catch (error) {
     console.error('Failed to create reminder:', error);
     throw error;
@@ -378,7 +378,7 @@ export async function updateReminder(id: string, userId: string, data: {
     `;
     
     console.log('Updated reminder:', result);
-    return result[0];
+    return transformReminderData(result[0]);
   } catch (error) {
     console.error('Failed to update reminder:', error);
     throw error;
@@ -397,6 +397,27 @@ export async function deleteReminder(id: string, userId: string) {
     console.error('Failed to delete reminder:', error);
     throw error;
   }
+}
+
+// Helper function to transform database reminder data to camelCase
+function transformReminderData(dbReminder: any) {
+  if (!dbReminder) return null;
+  
+  return {
+    id: dbReminder.id,
+    title: dbReminder.title,
+    description: dbReminder.description,
+    expirationDate: dbReminder.expiration_date,
+    priority: dbReminder.priority,
+    type: dbReminder.type,
+    isExpired: dbReminder.is_expired,
+    isCompleted: dbReminder.is_completed,
+    influencerId: dbReminder.influencer_id,
+    campaignId: dbReminder.campaign_id,
+    metadata: dbReminder.metadata,
+    createdAt: dbReminder.created_at,
+    updatedAt: dbReminder.updated_at,
+  };
 }
 
 
