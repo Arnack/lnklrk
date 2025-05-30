@@ -52,6 +52,7 @@ export default function RemindersPage() {
   }, [typeFilter, priorityFilter, statusFilter])
 
   const fetchReminders = async () => {
+    console.log('fetchReminders >>>')
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -75,7 +76,7 @@ export default function RemindersPage() {
       if (response.ok) {
         const data = await response.json()
         console.log('data >>>', data)
-        setReminders(data.reminders || [])
+        setReminders(data || [])
       }
     } catch (error) {
       console.error('Failed to fetch reminders:', error)
@@ -90,6 +91,7 @@ export default function RemindersPage() {
   }
 
   const handleReminderUpdated = (updatedReminder: Reminder) => {
+    if (!updatedReminder) return
     setReminders(prev => 
       prev.map(r => r.id === updatedReminder.id ? updatedReminder : r)
     )

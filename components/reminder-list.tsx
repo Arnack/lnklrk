@@ -197,13 +197,13 @@ export function ReminderList({
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
-                    {getTypeIcon(reminder.type)}
+                    {reminder && reminder.type ? getTypeIcon(reminder.type) : <Calendar className="h-4 w-4" />}
                     <CardTitle className={`text-lg ${reminder?.isCompleted ? 'line-through' : ''}`}>
                       {reminder.title}
                     </CardTitle>
                   </div>
-                  <Badge className={getPriorityColor(reminder.priority)}>
-                    {reminder.priority}
+                  <Badge className={getPriorityColor(reminder.priority || 'medium')}>
+                    {reminder.priority || 'medium'}
                   </Badge>
                 </div>
                 
@@ -239,7 +239,7 @@ export function ReminderList({
                   </div>
                   
                   <Badge variant="outline" className="capitalize">
-                    {reminder.type}
+                    {reminder.type || 'general'}
                   </Badge>
                 </div>
               </div>

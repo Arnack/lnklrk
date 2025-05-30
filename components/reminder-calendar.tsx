@@ -201,14 +201,14 @@ export function ReminderCalendar({
                         text-xs p-1 rounded truncate cursor-pointer
                         ${reminder.isCompleted ? 'opacity-60 line-through' : ''}
                         ${reminder.isExpired && !reminder.isCompleted ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
-                          reminder.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                          reminder.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                          (reminder.priority || 'medium') === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                          (reminder.priority || 'medium') === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
                           'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}
                       `}
                       title={`${reminder.title}${reminder.description ? ` - ${reminder.description}` : ''}`}
                     >
                       <div className="flex items-center gap-1">
-                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(reminder.priority)}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(reminder.priority || 'medium')}`}></div>
                         <span className="truncate">{reminder.title}</span>
                       </div>
                     </div>

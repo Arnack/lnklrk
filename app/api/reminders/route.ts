@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       metadata: data.metadata,
     })
 
-    return NextResponse.json(reminder, { status: 201 })
+    return NextResponse.json({ reminder }, { status: 201 })
   } catch (error) {
     console.error('Error creating reminder:', error)
     return NextResponse.json(

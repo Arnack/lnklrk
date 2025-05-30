@@ -60,7 +60,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Reminder not found' }, { status: 404 })
     }
 
-    return NextResponse.json(updatedReminder)
+    return NextResponse.json({ reminder: updatedReminder })
   } catch (error) {
     console.error('Error updating reminder:', error)
     return NextResponse.json(
