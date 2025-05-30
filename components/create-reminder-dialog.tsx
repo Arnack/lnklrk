@@ -128,7 +128,7 @@ export function CreateReminderDialog({
       })
       if (response.ok) {
         const data = await response.json()
-        setInfluencers(data.influencers || [])
+        setInfluencers(data || [])
       }
     } catch (error) {
       console.error('Failed to fetch influencers:', error)
@@ -144,7 +144,7 @@ export function CreateReminderDialog({
       })
       if (response.ok) {
         const data = await response.json()
-        setCampaigns(data.campaigns || [])
+        setCampaigns(data || [])
       }
     } catch (error) {
       console.error('Failed to fetch campaigns:', error)
@@ -342,7 +342,7 @@ export function CreateReminderDialog({
               name="expirationDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Expiration Date</FormLabel>
+                  <FormLabel>Expiration Date & Time</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -366,12 +366,57 @@ export function CreateReminderDialog({
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                          if (date) {
+                            // If we already have a time set, preserve it, otherwise set to current time or 9 AM
+                            const existingTime = field.value ? field.value : new Date()
+                            const currentHour = existingTime.getHours()
+                            const currentMinute = existingTime.getMinutes()
+                            
+                            // If no previous time was set, default to 9:00 AM
+                            const hour = field.value ? currentHour : 9
+                            const minute = field.value ? currentMinute : 0
+                            
+                            date.setHours(hour)
+                            date.setMinutes(minute)
+                            field.onChange(date)
+                          }
+                        }}
                         disabled={(date) =>
                           date < new Date(new Date().setHours(0, 0, 0, 0))
                         }
                         initialFocus
                       />
+                      <div className="p-3 border-t">
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="time"
+                            value={field.value ? format(field.value, "HH:mm") : ""}
+                            onChange={(e) => {
+                              const time = e.target.value
+                              if (time) {
+                                const [hours, minutes] = time.split(':')
+                                let newDate = field.value ? new Date(field.value) : new Date()
+                                
+                                // If no date was selected, default to today
+                                if (!field.value) {
+                                  newDate = new Date()
+                                  // Don't allow past dates
+                                  const now = new Date()
+                                  if (newDate < now) {
+                                    newDate = now
+                                  }
+                                }
+                                
+                                newDate.setHours(parseInt(hours))
+                                newDate.setMinutes(parseInt(minutes))
+                                field.onChange(newDate)
+                              }
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
                     </PopoverContent>
                   </Popover>
                   <FormDescription>
