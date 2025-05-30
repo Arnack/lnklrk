@@ -62,4 +62,30 @@ CREATE TABLE IF NOT EXISTS influencers (
 );
 
 -- Add tags column to existing table if it doesn't exist
-ALTER TABLE influencers ADD COLUMN IF NOT EXISTS tags TEXT[]; 
+ALTER TABLE influencers ADD COLUMN IF NOT EXISTS tags TEXT[];
+
+-- Create reminders table
+CREATE TABLE IF NOT EXISTS "reminders" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id" uuid NOT NULL REFERENCES "users"("id"),
+    "title" text NOT NULL,
+    "description" text,
+    "expiration_date" timestamp NOT NULL,
+    "is_expired" boolean DEFAULT false,
+    "is_completed" boolean DEFAULT false,
+    "type" text NOT NULL DEFAULT 'general',
+    "influencer_id" uuid REFERENCES "influencers"("id") ON DELETE CASCADE,
+    "campaign_id" uuid REFERENCES "campaigns"("id") ON DELETE CASCADE,
+    "priority" text NOT NULL DEFAULT 'medium',
+    "metadata" jsonb,
+    "created_at" timestamp DEFAULT now(),
+    "updated_at" timestamp DEFAULT now()
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS "idx_reminders_user_id" ON "reminders"("user_id");
+CREATE INDEX IF NOT EXISTS "idx_reminders_expiration_date" ON "reminders"("expiration_date");
+CREATE INDEX IF NOT EXISTS "idx_reminders_is_expired" ON "reminders"("is_expired");
+CREATE INDEX IF NOT EXISTS "idx_reminders_type" ON "reminders"("type");
+CREATE INDEX IF NOT EXISTS "idx_reminders_influencer_id" ON "reminders"("influencer_id");
+CREATE INDEX IF NOT EXISTS "idx_reminders_campaign_id" ON "reminders"("campaign_id"); 

@@ -25,6 +25,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { CampaignInfluencer } from "@/types/campaign"
 import { Edit, Loader2, MoreHorizontal, Star, Trash2 } from "lucide-react"
+import LS from "@/app/service/LS"
 
 interface InfluencerStatusManagerProps {
   campaignInfluencer: CampaignInfluencer
@@ -55,6 +56,7 @@ export function InfluencerStatusManager({ campaignInfluencer, onUpdate, onRemove
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': LS.getUserId() || ''
         },
         body: JSON.stringify({
           campaignInfluencerId: campaignInfluencer.id,
@@ -93,6 +95,9 @@ export function InfluencerStatusManager({ campaignInfluencer, onUpdate, onRemove
         `/api/campaigns/${campaignInfluencer.campaignId}/influencers?influencerId=${campaignInfluencer.influencerId}`,
         {
           method: 'DELETE',
+          headers: {
+            'x-user-id': LS.getUserId() || ''
+          }
         }
       )
 

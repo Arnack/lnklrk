@@ -26,7 +26,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
   const fetchCampaign = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch(`/api/campaigns/${params.id}`)
+      const response = await fetch(`/api/campaigns/${params.id}`, {
+        headers: {
+          'x-user-id': LS.getUserId() || ''
+        }
+      })
       if (!response.ok) {
         if (response.status === 404) {
           setError('Campaign not found')

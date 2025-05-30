@@ -97,4 +97,36 @@ export const influencers = pgTable('influencers', {
   }>>(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const reminders = pgTable('reminders', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(), // Link to user who created the reminder
+  title: text('title').notNull(),
+  description: text('description'),
+  expirationDate: timestamp('expiration_date').notNull(),
+  isExpired: boolean('is_expired').default(false),
+  isCompleted: boolean('is_completed').default(false),
+  type: text('type').notNull().default('general'), // 'general', 'influencer', 'campaign'
+  
+  // Related entity IDs (nullable based on type)
+  influencerId: uuid('influencer_id').references(() => influencers.id, { onDelete: 'cascade' }),
+  campaignId: uuid('campaign_id').references(() => campaigns.id, { onDelete: 'cascade' }),
+  
+  // Priority level
+  priority: text('priority').notNull().default('medium'), // 'low', 'medium', 'high'
+  
+  // Additional metadata
+  metadata: jsonb('metadata').$type<{
+    tags?: string[];
+    color?: string;
+    attachments?: Array<{
+      name: string;
+      url: string;
+      type: string;
+    }>;
+  }>(),
+  
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 }); 

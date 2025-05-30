@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserMenu } from "@/components/user-menu"
+import { ReminderNotification } from "@/components/reminder-notification"
 import { cn } from "@/lib/utils"
 import { 
   LayoutDashboard, 
@@ -13,7 +14,8 @@ import {
   BarChart3, 
   Settings, 
   FileText,
-  Target 
+  Target,
+  Bell
 } from "lucide-react"
 
 const navigationItems = [
@@ -34,6 +36,12 @@ const navigationItems = [
     href: "/campaigns",
     icon: Megaphone,
     description: "Campaign management"
+  },
+  {
+    name: "Reminders",
+    href: "/reminders",
+    icon: Bell,
+    description: "Manage reminders"
   },
   // {
   //   name: "Analytics",
@@ -95,8 +103,9 @@ export function Navbar() {
             })}
           </div>
 
-          {/* Right side - Theme toggle and User menu */}
+          {/* Right side - Reminder notification, Theme toggle and User menu */}
           <div className="flex items-center space-x-2">
+            <ReminderNotification />
             <ThemeToggle />
             <UserMenu />
           </div>

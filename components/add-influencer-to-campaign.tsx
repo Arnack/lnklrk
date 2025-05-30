@@ -89,6 +89,7 @@ export function AddInfluencerToCampaign({ campaignId, onInfluencerAdded }: AddIn
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': LS.getUserId() || ''
         },
         body: JSON.stringify({
           influencerId: selectedInfluencer.id,

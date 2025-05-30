@@ -112,6 +112,9 @@ export default function CampaignsPage() {
       setIsDeleting(true)
       const response = await fetch(`/api/campaigns/${id}`, {
         method: 'DELETE',
+        headers: {
+          'x-user-id': LS.getUserId() || ''
+        }
       })
       
       if (!response.ok) {
