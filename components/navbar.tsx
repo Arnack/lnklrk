@@ -37,12 +37,12 @@ const navigationItems = [
     icon: Megaphone,
     description: "Campaign management"
   },
-  {
-    name: "Reminders",
-    href: "/reminders",
-    icon: Bell,
-    description: "Manage reminders"
-  },
+  // {
+  //   name: "Reminders",
+  //   href: "/reminders",
+  //   icon: Bell,
+  //   description: "Manage reminders"
+  // },
   // {
   //   name: "Analytics",
   //   href: "/analytics",

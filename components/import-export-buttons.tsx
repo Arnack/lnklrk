@@ -116,12 +116,16 @@ export function ImportExportButtons({ onDataUpdate }: ImportExportButtonsProps) 
 
           // Get existing influencers to check for duplicates
           const existingInfluencers = await fetchInfluencers()
-          const existingProfileLinks = new Set(existingInfluencers.map(inf => inf.profileLink))
+
+          console.log('importedInfluencers >>>', importedInfluencers)
+          console.log('existingInfluencers >>>', existingInfluencers)
+
+          const existingProfileLinks = new Set(existingInfluencers.map(inf => inf.profile_link))
 
           // Filter out duplicates and create new influencers
           const newInfluencers = []
           for (const newInf of importedInfluencers) {
-            if (!newInf.profileLink || !existingProfileLinks.has(newInf.profileLink)) {
+            if (!newInf.profile_link || !existingProfileLinks.has(newInf.profile_link)) {
               try {
                 const created = await createInfluencer(newInf)
                 newInfluencers.push(created)

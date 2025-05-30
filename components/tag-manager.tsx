@@ -27,10 +27,10 @@ const SUGGESTED_TAGS = [
   
   // Location-based
   "US-based",
-  "UK-based",
-  "EU-based",
-  "Canada-based",
-  "Australia-based",
+  // "UK-based",
+  // "EU-based",
+  // "Canada-based",
+  // "Australia-based",
   "global reach",
   
   // Demographics

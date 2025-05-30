@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
+    console.log('data >>>', data);
     const influencer = await createInfluencer({
       ...data,
       userId,

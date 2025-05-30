@@ -28,7 +28,7 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "followers" || name === "rate" || name === "engagementRate" ? Number(value) : value,
+      [name]: name === "followers" || name === "rate" || name === "engagementRate" || name === "engagement_rate" ? Number(value) : value,
     }))
   }
 
@@ -57,19 +57,20 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
   }
 
   const handleAddBrand = () => {
-    if (newBrand.trim() && !formData.brandsWorkedWith?.includes(newBrand.trim())) {
+    if (newBrand.trim() && !formData.brands_worked_with?.includes(newBrand.trim())) {
       setFormData((prev) => ({
         ...prev,
-        brandsWorkedWith: [...(prev.brandsWorkedWith || []), newBrand.trim()],
+        brands_worked_with: [...(prev.brands_worked_with || []), newBrand.trim()],
       }))
       setNewBrand("")
     }
   }
 
   const handleRemoveBrand = (brand: string) => {
+    console.log('brand', brand)
     setFormData((prev) => ({
       ...prev,
-      brandsWorkedWith: prev.brandsWorkedWith?.filter((b) => b !== brand) || [],
+      brands_worked_with: prev.brands_worked_with?.filter((b) => b !== brand) || [],
     }))
   }
 
@@ -121,17 +122,17 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
             </div>
 
             <div>
-              <Label htmlFor="profileLink">Profile Link</Label>
+              <Label htmlFor="profile_link">Profile Link</Label>
               {isEditing ? (
-                <Input id="profileLink" name="profileLink" value={formData.profileLink} onChange={handleInputChange} />
+                <Input id="profile_link" name="profile_link" value={formData.profile_link} onChange={handleInputChange} />
               ) : (
                 <a
-                  href={influencer.profileLink}
+                  href={influencer.profile_link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline break-all block"
                 >
-                  {influencer.profileLink}
+                  {influencer.profile_link}
                 </a>
               )}
             </div>
@@ -282,7 +283,7 @@ export function ProfileDetails({ influencer, onUpdate }: ProfileDetailsProps) {
         <div>
           <Label>Brands Worked With</Label>
           <div className="flex flex-wrap gap-2 mt-2">
-            {formData.brandsWorkedWith?.map((brand, index) => (
+            {formData.brands_worked_with?.map((brand, index) => (
               <Badge key={index} variant="outline" className="text-sm">
                 {brand}
                 {isEditing && <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleRemoveBrand(brand)} />}

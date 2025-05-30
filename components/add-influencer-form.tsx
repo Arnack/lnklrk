@@ -34,16 +34,16 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
   
   const [formData, setFormData] = useState({
     handle: "",
-    profileLink: "",
+    profile_link: "",
     followers: 0,
     email: "",
     rate: 0,
     categories: [] as string[],
-    followersAge: "",
-    followersSex: "",
-    engagementRate: 0,
+    followers_age: "",
+    followers_sex: "",
+    engagement_rate: 0,
     platform: "Instagram",
-    brandsWorkedWith: [] as string[],
+    brands_worked_with: [] as string[],
     tags: [] as string[],
   })
 
@@ -80,35 +80,36 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
   }
 
   const handleAddBrand = () => {
-    if (newBrand.trim() && !formData.brandsWorkedWith.includes(newBrand.trim())) {
+    if (newBrand.trim() && !formData.brands_worked_with.includes(newBrand.trim())) {
       setFormData((prev) => ({
         ...prev,
-        brandsWorkedWith: [...prev.brandsWorkedWith, newBrand.trim()],
+        brands_worked_with: [...prev.brands_worked_with, newBrand.trim()],
       }))
       setNewBrand("")
     }
   }
 
   const handleRemoveBrand = (brand: string) => {
+    console.log('brand', brand)
     setFormData((prev) => ({
       ...prev,
-      brandsWorkedWith: prev.brandsWorkedWith.filter((b) => b !== brand),
+      brands_worked_with: prev.brands_worked_with.filter((b) => b !== brand),
     }))
   }
 
   const resetForm = () => {
     setFormData({
       handle: "",
-      profileLink: "",
+      profile_link: "",
       followers: 0,
       email: "",
       rate: 0,
       categories: [],
-      followersAge: "",
-      followersSex: "",
-      engagementRate: 0,
+      followers_age: "",
+      followers_sex: "",
+      engagement_rate: 0,
       platform: "Instagram",
-      brandsWorkedWith: [],
+      brands_worked_with: [],
       tags: [],
     })
     setNewCategory("")
@@ -230,12 +231,12 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="profileLink">Profile Link</Label>
+              <Label htmlFor="profile_link">Profile Link</Label>
               <Input
-                id="profileLink"
-                name="profileLink"
+                id="profile_link"
+                name="profile_link"
                 placeholder="https://..."
-                value={formData.profileLink}
+                value={formData.profile_link}
                 onChange={handleInputChange}
               />
             </div>
@@ -285,14 +286,14 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
                 min="0"
                 max="100"
                 step="0.01"
-                value={formData.engagementRate}
+                value={formData.engagement_rate}
                 onChange={handleInputChange}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="followersAge">Followers Age</Label>
-              <Select value={formData.followersAge} onValueChange={(value) => handleSelectChange("followersAge", value)}>
+              <Label htmlFor="followers_age">Followers Age</Label>
+              <Select value={formData.followers_age} onValueChange={(value) => handleSelectChange("followers_age", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select age range" />
                 </SelectTrigger>
@@ -311,8 +312,8 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="followersSex">Followers Gender</Label>
-              <Select value={formData.followersSex} onValueChange={(value) => handleSelectChange("followersSex", value)}>
+              <Label htmlFor="followers_sex">Followers Gender</Label>
+              <Select value={formData.followers_sex} onValueChange={(value) => handleSelectChange("followers_sex", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select gender distribution" />
                 </SelectTrigger>
@@ -358,7 +359,7 @@ export function AddInfluencerForm({ onInfluencerAdded }: AddInfluencerFormProps)
             <div>
               <Label>Brands Worked With</Label>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.brandsWorkedWith.map((brand, index) => (
+                  {formData.brands_worked_with.map((brand, index) => (
                   <Badge key={index} variant="outline" className="text-sm">
                     {brand}
                     <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => handleRemoveBrand(brand)} />

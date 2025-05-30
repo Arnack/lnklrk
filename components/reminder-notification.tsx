@@ -100,7 +100,6 @@ export function ReminderNotification() {
     }
   }
 
-  console.log('reminders >>>', reminders)
   const activeRemindersCount = reminders.filter(r => !r.isExpired && !r.isCompleted).length
 
   return (

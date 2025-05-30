@@ -109,12 +109,12 @@ export async function createInfluencer(data: Omit<DbInfluencer, 'id' | 'createdA
         platform, brands_worked_with, notes, files, messages, campaigns,
         created_at, updated_at
       ) VALUES (
-        ${id}, ${data.userId}, ${data.handle}, ${data.profileLink || null}, 
+        ${id}, ${data.userId}, ${data.handle}, ${data.profileLink || (data as any).profile_link || null}, 
         ${data.followers || 0}, ${data.email || null}, ${data.rate || 0},
         ${data.categories || []}, ${data.tags || []}, ${data.followersAge || data.followers_age || null},
         ${data.followersSex || data.followers_sex || null}, 
-        ${data.engagementRate || 0}, ${data.platform || 'Instagram'}, 
-        ${data.brandsWorkedWith || []}, ${JSON.stringify(data.notes || [])}, 
+        ${data.engagementRate || (data as any).engagement_rate || 0}, ${data.platform || 'Instagram'}, 
+        ${data.brandsWorkedWith || (data as any).brands_worked_with || []}, ${JSON.stringify(data.notes || [])}, 
         ${JSON.stringify(data.files || [])}, ${JSON.stringify(data.messages || [])}, 
         ${JSON.stringify(data.campaigns || [])}, ${now}, ${now}
       ) RETURNING *
@@ -139,7 +139,7 @@ export async function updateInfluencer(id: string, data: DbInfluencerUpdate) {
       UPDATE influencers 
       SET 
         handle = ${data.handle || null},
-        profile_link = ${data.profileLink || null},
+        profile_link = ${data.profileLink || (data as any).profile_link || null},
         followers = ${data.followers || 0},
         email = ${data.email || null},
         rate = ${data.rate || 0},
@@ -147,9 +147,9 @@ export async function updateInfluencer(id: string, data: DbInfluencerUpdate) {
         tags = ${data.tags || []},
         followers_age = ${data.followersAge || data.followers_age || null},
         followers_sex = ${data.followersSex || data.followers_sex || null},
-        engagement_rate = ${data.engagementRate || data.engagement_rate || 0},
+        engagement_rate = ${data.engagementRate || (data as any).engagement_rate || 0},
         platform = ${data.platform || 'Instagram'},
-        brands_worked_with = ${data.brandsWorkedWith || data.brands_worked_with || []},
+        brands_worked_with = ${(data as any).brands_worked_with || []},
         notes = ${JSON.stringify(data.notes || [])},
         files = ${JSON.stringify(data.files || [])},
         messages = ${JSON.stringify(data.messages || [])},
