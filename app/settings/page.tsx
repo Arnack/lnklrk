@@ -92,6 +92,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           userId: userId,
           name: settings.name,
+          email: settings.email,
           googleClientId: settings.googleClientId,
           googleApiKey: settings.googleApiKey
         })
@@ -184,22 +185,29 @@ export default function SettingsPage() {
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
                   Email
                 </label>
+                
                 <Input
                   id="email"
                   type="email"
                   value={settings.email}
-                  disabled
-                  className="bg-muted"
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="Your email"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Email cannot be changed from this interface
-                </p>
+                <Alert className="mt-3 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-100">
+                    <strong>Warning:</strong> Changing your email address may affect your account access and authentication. 
+                    Make sure you have access to the new email address before saving.
+                  </AlertDescription>
+                </Alert>
               </div>
             </CardContent>
           </Card>
 
           {/* Gmail Integration Settings */}
-          <Card className={hasGmailCredentials ? "border-green-200 bg-green-50/30" : "border-orange-200 bg-orange-50/30"}>
+          <Card className={hasGmailCredentials ?
+            "border-green-200 bg-green-50/30 dark:border-green-800 dark:bg-green-900/30" :
+            "border-orange-200 bg-orange-50/30 dark:border-orange-800 dark:bg-orange-900/30"}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
