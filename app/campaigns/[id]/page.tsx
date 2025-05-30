@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddInfluencerToCampaign } from "@/components/add-influencer-to-campaign"
 import { InfluencerStatusManager } from "@/components/influencer-status-manager"
+import { EditCampaignForm } from "@/components/edit-campaign-form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import type { CampaignWithInfluencers, CampaignInfluencer } from "@/types/campaign"
+import type { CampaignWithInfluencers, CampaignInfluencer, Campaign } from "@/types/campaign"
 import { Loader2, ArrowLeft, Users, DollarSign, Calendar, Star, ExternalLink, Edit, ChevronDown, ChevronUp } from "lucide-react"
 import LS from "@/app/service/LS"
 
@@ -77,6 +78,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         influencers: campaign.influencers.filter(inf => inf.influencerId !== influencerId),
       })
     }
+  }
+
+  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+    setCampaign(prevCampaign => ({
+      ...updatedCampaign,
+      influencers: prevCampaign?.influencers || []
+    }))
   }
 
   const getStatusColor = (status: CampaignInfluencer['status']) => {
@@ -175,21 +183,27 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
             </div>
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={() => setShowOverviewCards(!showOverviewCards)}
-          className="flex items-center gap-2"
-        >
-          {showOverviewCards ? (
-            <>
-              Hide Overview <ChevronUp className="h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Show Overview <ChevronDown className="h-4 w-4" />
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <EditCampaignForm 
+            campaign={campaign} 
+            onCampaignUpdated={handleCampaignUpdated}
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => setShowOverviewCards(!showOverviewCards)}
+            className="flex items-center gap-2"
+          >
+            {showOverviewCards ? (
+              <>
+                Hide Overview <ChevronUp className="h-4 w-4" />
+              </>
+            ) : (
+              <>
+                Show Overview <ChevronDown className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Campaign Overview Cards */}
