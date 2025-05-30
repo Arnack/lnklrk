@@ -10,12 +10,28 @@ import { Eye, EyeOff, AlertCircle, Loader2, Shield, UserPlus, Users, Target, Zap
 import { ThemeToggle } from "@/components/theme-toggle"
 import LS from "@/app/service/LS"
 
+const disclaymerVars = [
+  "欧利以键盘为笔，以灵魂为墨，倾心创作",
+  "欧利瞎敲键盘，乱撒真心，居然做成了 （大概）",
+  "欧利喜欢行星轨道的非对称性，但最终做出来的却是CRM系统",
+  "Greg meant to play with keybord — but somehow made this",
+]
+
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [formMode, setFormMode] = useState<'login' | 'changePassword' | 'changeEmail'>('login')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [solarSystemMode, setSolarSystemMode] = useState<'solar' | 'earth'>('solar')
+  const [disclaymerWasClicked, setDisclaymerWasClicked] = useState(false)
+  const [disclaymerIndex, setDisclaymerIndex] = useState(0)
+
+  const handleDisclaymerClick = () => {
+    setDisclaymerWasClicked(true)
+    setDisclaymerIndex(() => Math.floor(Math.random() * disclaymerVars.length))
+  }
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -130,6 +146,10 @@ export function LoginForm() {
     }
   }
 
+  const handleEarthClick = () => {
+    setSolarSystemMode(solarSystemMode === 'solar' ? 'earth' : 'solar')
+  }
+
   if (!mounted) return null
 
   return (
@@ -204,151 +224,302 @@ export function LoginForm() {
           {/* Welcome Text */}
           <div className="text-center mb-4 lg:mb-6">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-4 font-mono">
-              Chinny CRM
+              {solarSystemMode === 'solar' ? 'Chinny CRM' : 'Earth Station'}
             </h1>
             <p className="text-blue-600 dark:text-blue-400 text-sm sm:text-base lg:text-lg font-light max-w-sm px-4">
-              Orchestrating influencer relationships with precision and clarity
+              {solarSystemMode === 'solar' 
+                ? 'Orchestrating influencer relationships with precision and clarity'
+                : '🚀 Monitoring Earth\'s orbital infrastructure and satellite networks'
+              }
             </p>
           </div>
 
           <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px]">
-            {/* Central Sun */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50 animate-pulse">
-                <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20"></div>
-              </div>
-            </div>
-
-            {/* Mercury Orbit */}
-            <div
-              className="absolute"
-              style={{ top: "calc(50% - 1px)", left: "calc(50% - 2px)", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slow">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 bg-gray-400 rounded-full"></div>
+            {solarSystemMode === 'solar' ? (
+              <>
+                {/* Central Sun */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/30">
+                    <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-10"></div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Venus Orbit */}
-            <div
-              className="absolute"
-              style={{ top: "calc(50% + -2px)", left: "calc(50% + 1px)", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-24 h-24 sm:w-36 sm:h-36 lg:w-48 lg:h-48 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slower">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-3 lg:h-3 bg-orange-300 rounded-full"></div>
+                {/* Mercury Orbit */}
+                <div
+                  className="absolute"
+                  style={{ top: "calc(50% - 1px)", left: "calc(50% - 2px)", transform: "translate(-50%, -50%)" }}
+                >
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slow">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 bg-gray-400 rounded-full"></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Earth Orbit */}
-            <div
-              className="absolute"
-              style={{ top: "calc(50% + -1px)", left: "calc(50% - 3px)", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slowest">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-3 lg:h-3 bg-blue-400 rounded-full relative">
-                    {/* Moon - only show on larger screens */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden sm:block">
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 animate-spin-fast">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 sm:w-0.5 sm:h-0.5 lg:w-1 lg:h-1 bg-gray-300 rounded-full"></div>
+                {/* Venus Orbit */}
+                <div
+                  className="absolute"
+                  style={{ top: "calc(50% + -2px)", left: "calc(50% + 1px)", transform: "translate(-50%, -50%)" }}
+                >
+                  <div className="w-24 h-24 sm:w-36 sm:h-36 lg:w-48 lg:h-48 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slower">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-3 lg:h-3 bg-orange-300 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                
+
+                {/* Mars Orbit */}
+                <div
+                  className="absolute"
+                  style={{ top: "calc(50% + 2px)", left: "calc(50% + 2px)", transform: "translate(-50%, -50%)" }}
+                >
+                  <div className="w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-very-slow">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2.5 lg:h-2.5 bg-red-400 rounded-full relative">
+                        {/* Mars moons - only show on larger screens */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
+                          <div className="w-4 h-4 animate-spin-very-fast">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 bg-gray-400 rounded-full"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
+                          <div className="w-6 h-6 animate-spin-medium">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 bg-gray-500 rounded-full"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Mars Orbit */}
-            <div
-              className="absolute"
-              style={{ top: "calc(50% + 2px)", left: "calc(50% + 2px)", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-very-slow">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2.5 lg:h-2.5 bg-red-400 rounded-full relative">
-                    {/* Mars moons - only show on larger screens */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
-                      <div className="w-4 h-4 animate-spin-very-fast">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 bg-gray-400 rounded-full"></div>
+                {/* Jupiter Orbit - only show on larger screens */}
+                <div
+                  className="absolute hidden lg:block"
+                  style={{ top: "calc(50% + -3px)", left: "calc(50% - 1px)", transform: "translate(-50%, -50%)" }}
+                >
+                  <div className="w-96 h-96 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-ultra-slow">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-4 h-4 bg-orange-600 rounded-full relative">
+                        {/* Jupiter moons */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-5 h-5 animate-spin-fast">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 bg-yellow-300 rounded-full"></div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden lg:block">
-                      <div className="w-6 h-6 animate-spin-medium">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 bg-gray-500 rounded-full"></div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-6 h-6 animate-spin-medium">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 bg-blue-200 rounded-full"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-7 h-7 animate-spin-slow">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 bg-gray-300 rounded-full"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-8 h-8 animate-spin-slower">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 bg-gray-600 rounded-full"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Jupiter Orbit - only show on larger screens */}
-            <div
-              className="absolute hidden lg:block"
-              style={{ top: "calc(50% + -3px)", left: "calc(50% - 1px)", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-96 h-96 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-ultra-slow">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-4 h-4 bg-orange-600 rounded-full relative">
-                    {/* Jupiter moons */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-5 h-5 animate-spin-fast">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 bg-yellow-300 rounded-full"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-6 h-6 animate-spin-medium">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 bg-blue-200 rounded-full"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-7 h-7 animate-spin-slow">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 bg-gray-300 rounded-full"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-8 h-8 animate-spin-slower">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-0.5 h-0.5 bg-gray-600 rounded-full"></div>
+                {/* Earth Orbit */}
+                <div
+                  className="absolute"
+                  style={{ top: "calc(50% + -1px)", left: "calc(50% - 3px)", transform: "translate(-50%, -50%)" }}
+                >
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 border border-dashed border-cyan-500/40 dark:border-cyan-400/40 rounded-full animate-spin-slowest">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 100 }}>
+                      <div 
+                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-3 lg:h-3 bg-blue-400 rounded-full relative cursor-pointer hover:scale-110 transition-all duration-300 hover:shadow-md hover:shadow-blue-400/30"
+                        onClick={handleEarthClick}
+                        style={{ zIndex: 101, pointerEvents: 'auto' }}
+                        title="🌍 Click to zoom to Earth!"
+                      >
+                        {/* Larger clickable area */}
+                        <div 
+                          className="absolute inset-0 w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 -translate-x-1/2 -translate-y-1/2 rounded-full cursor-pointer"
+                          onClick={handleEarthClick}
+                          style={{ 
+                            zIndex: 102, 
+                            pointerEvents: 'auto',
+                            left: '50%',
+                            top: '50%'
+                          }}
+                        />
+                        {/* Moon - only show on larger screens */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden sm:block" style={{ zIndex: 99, pointerEvents: 'none' }}>
+                          <div className="w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 animate-spin-fast">
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                              <div className="w-0.5 h-0.5 sm:w-0.5 sm:h-0.5 lg:w-1 lg:h-1 bg-gray-300 rounded-full"></div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            ) : (
+              /* Earth-Moon-ISS-Satellites System */
+              <>
+                {/* Grid lines for blueprint effect */}
+                <div className="absolute inset-0 opacity-20">
+                  {/* Vertical lines */}
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div
+                      key={`v-${i}`}
+                      className="absolute top-0 bottom-0 w-px bg-cyan-400"
+                      style={{ left: `${(i + 1) * 10}%` }}
+                    />
+                  ))}
+                  {/* Horizontal lines */}
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div
+                      key={`h-${i}`}
+                      className="absolute left-0 right-0 h-px bg-cyan-400"
+                      style={{ top: `${(i + 1) * 10}%` }}
+                    />
+                  ))}
+                </div>
+
+                {/* Central Earth */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div
+                    className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 cursor-pointer hover:scale-110 transition-transform duration-300"
+                    onClick={handleEarthClick}
+                    style={{ zIndex: 102 }}
+                    title="🌍 Click to return to Solar System"
+                  >
+                    <div className="absolute inset-0 bg-blue-400 rounded-full animate-pulse opacity-20"></div>
+                  </div>
+                </div>
+
+                {/* Moon Orbit */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 border-2 border-dashed border-cyan-400/40 rounded-full animate-spin-slowest">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-gray-300 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ISS Orbit */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 border border-dashed border-cyan-400/60 rounded-full animate-spin-very-fast">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-1 h-1 sm:w-1 sm:h-1 lg:w-1 lg:h-1 bg-white rounded-sm" title="🚀 International Space Station"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* GPS Satellites Orbit */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-24 h-24 sm:w-36 sm:h-36 lg:w-48 lg:h-48 border border-dashed border-cyan-400/30 rounded-full animate-spin-slow">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-green-400 rounded-full"></div>
+                    </div>
+                    <div className="absolute top-1/4 right-0 transform translate-x-1/2 -translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-green-400 rounded-full"></div>
+                    </div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-green-400 rounded-full"></div>
+                    </div>
+                    <div className="absolute top-1/4 left-0 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-green-400 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Geostationary Satellites */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 border border-dashed border-cyan-400/20 rounded-full animate-spin-ultra-slow">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-red-400 rounded-full"></div>
+                    </div>
+                    <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-red-400 rounded-full"></div>
+                    </div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-red-400 rounded-full"></div>
+                    </div>
+                    <div className="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-0.5 h-0.5 lg:w-0.5 lg:h-0.5 bg-red-400 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hubble Telescope */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div onClick={handleEarthClick} className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 border border-dashed border-cyan-400/50 rounded-full animate-spin-fast cursor-pointer">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-1 h-1 lg:w-1 lg:h-1 bg-purple-400 rounded-full" title="🔭 Hubble Space Telescope"></div>
+                    </div>
+                  </div>
+                </div>
+
+              </>
+            )}
           </div>
 
           {/* Feature Icons */}
           <div className="mt-4 lg:mt-6 flex items-center justify-center gap-4 lg:gap-6 text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-            <div className="flex items-center gap-1 lg:gap-2">
-              <Users className="w-3 h-3 lg:w-4 lg:h-4 text-blue-600 dark:text-blue-400" />
-              <span>Influencers</span>
-            </div>
-            <div className="flex items-center gap-1 lg:gap-2">
-              <Target className="w-3 h-3 lg:w-4 lg:h-4 text-purple-600 dark:text-purple-400" />
-              <span>Campaigns</span>
-            </div>
-            <div className="flex items-center gap-1 lg:gap-2">
-              <Zap className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 dark:text-green-400" />
-              <span>Analytics</span>
-            </div>
+            {solarSystemMode === 'solar' ? (
+              <>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <Users className="w-3 h-3 lg:w-4 lg:h-4 text-blue-600 dark:text-blue-400" />
+                  <span>Influencers</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <Target className="w-3 h-3 lg:w-4 lg:h-4 text-purple-600 dark:text-purple-400" />
+                  <span>Campaigns</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <Zap className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 dark:text-green-400" />
+                  <span>Analytics</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <div className="w-3 h-3 lg:w-4 lg:h-4 bg-white rounded-sm"></div>
+                  <span>ISS</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <div className="w-3 h-3 lg:w-4 lg:h-4 bg-gray-300 rounded-full"></div>
+                  <span>Moon</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <div className="w-3 h-3 lg:w-4 lg:h-4 bg-green-400 rounded-full"></div>
+                  <span>GPS</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <div className="w-3 h-3 lg:w-4 lg:h-4 bg-red-400 rounded-full"></div>
+                  <span>GEO</span>
+                </div>
+                <div className="flex items-center gap-1 lg:gap-2">
+                  <div className="w-3 h-3 lg:w-4 lg:h-4 bg-purple-400 rounded-full"></div>
+                  <span>Hubble</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -578,10 +749,16 @@ export function LoginForm() {
             </div>
 
             {/* Footer */}
-            <div className="text-center mt-4 sm:mt-6">
-              <p className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider px-4">
-                Created with ⌨️ & ❤️ by <a href="https://linklurk.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Greg</a>
-              </p>
+            <div className="text-center mt-4 sm:mt-6 relative z-10" onClick={handleDisclaymerClick}>
+              {!disclaymerWasClicked ? (
+                <p className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider px-4">
+                  Created with ⌨️ & ❤️ by <a target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Greg</a>
+                </p>
+              ) : (
+                <p onClick={handleDisclaymerClick} className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider px-4">
+                  {disclaymerVars[disclaymerIndex]}
+                </p>
+              )}
             </div>
           </div>
         </div>
