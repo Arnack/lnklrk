@@ -53,7 +53,6 @@ export default function RemindersPage() {
   }, [typeFilter, priorityFilter, statusFilter])
 
   const fetchReminders = async () => {
-    console.log('fetchReminders >>>')
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -76,7 +75,6 @@ export default function RemindersPage() {
       })
       if (response.ok) {
         const data = await response.json()
-        console.log('data >>>', data)
         setReminders(data || [])
       }
     } catch (error) {
@@ -112,8 +110,6 @@ export default function RemindersPage() {
   const activeRemindersCount = reminders.filter(r => !r?.isExpired && !r?.isCompleted).length
   const expiredRemindersCount = reminders.filter(r => r?.isExpired && !r?.isCompleted).length
   const completedRemindersCount = reminders.filter(r => r?.isCompleted).length
-
-  console.log('reminders page >>>', reminders)
 
   return (
     <div className="container mx-auto p-6 space-y-6">

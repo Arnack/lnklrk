@@ -187,9 +187,6 @@ class GmailService {
     // Check if we have credentials first
     if (!this.credentials.googleClientId || !this.credentials.googleApiKey) {
 
-      console.log('>>> ?:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
-      console.log('>>> ?:', process.env.NEXT_PUBLIC_GOOGLE_API_KEY)
-
       throw new Error('Gmail API credentials not configured. Please configure them in Settings.')
     }
 

@@ -116,8 +116,6 @@ export function FilterBar({ influencers, onFilterChange }: FilterBarProps) {
     return count.toString()
   }
 
-  console.log(selectedGender)
-  console.log('influencers >>>', influencers)
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">

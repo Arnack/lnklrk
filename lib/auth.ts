@@ -56,35 +56,29 @@ export async function createUser(email: string, password: string, name: string):
 
 export async function authenticateUser(email: string, password: string): Promise<User | null> {
   try {
-    console.log('Authenticating user:', email);
     
     const result = await db
       .select()
       .from(users)
       .where(eq(users.email, email));
     
-    console.log('Query result:', result);
-    
     if (result.length === 0) {
-      console.log('No user found with email:', email);
       return null;
     }
     
     const user = result[0];
     
     if (!(user.isActive ?? true)) {
-      console.log('User is not active:', email);
+      console.error('User is not active:', email);
       return null;
     }
     
     const isValidPassword = await verifyPassword(password, user.password);
     
     if (!isValidPassword) {
-      console.log('Invalid password for user:', email);
+      console.error('Invalid password for user:', email);
       return null;
     }
-    
-    console.log('Authentication successful for user:', email);
     
     // Return user without password
     return {

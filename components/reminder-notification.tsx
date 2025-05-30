@@ -37,14 +37,14 @@ export function ReminderNotification() {
 
   const fetchActiveReminders = async () => {
     try {
-      const response = await fetch('/api/reminders?active=true&limit=5', {
+      const response = await fetch('/api/reminders?active=true&limit=10', {
         headers: {
           'x-user-id': LS.getUserId() || ''
         }
       })
       if (response.ok) {
         const data = await response.json()
-        setReminders(data.reminders || [])
+        setReminders(data || [])
       }
     } catch (error) {
       console.error('Failed to fetch reminders:', error)
@@ -100,6 +100,7 @@ export function ReminderNotification() {
     }
   }
 
+  console.log('reminders >>>', reminders)
   const activeRemindersCount = reminders.filter(r => !r.isExpired && !r.isCompleted).length
 
   return (

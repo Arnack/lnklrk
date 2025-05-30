@@ -5,7 +5,6 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  console.log('GET request received for campaign ID: >>>', params.id);
   try {
     const campaign = await getCampaignById(params.id);
     
