@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -19,12 +19,15 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Influencer } from "@/types/influencer"
-import { Instagram, Youtube, Twitch, Twitter, Trash2, AlertTriangle, Loader2 } from "lucide-react"
+import { Instagram, Youtube, Twitch, Twitter, Trash2, AlertTriangle, Loader2, ChevronUp, ChevronDown } from "lucide-react"
 
 interface InfluencerTableProps {
   influencers: Influencer[]
   onDelete: (ids: string[]) => void
 }
+
+type SortField = 'handle' | 'platform' | 'followers' | 'rate' | 'engagement_rate'
+type SortDirection = 'asc' | 'desc' | null
 
 export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps) {
   const router = useRouter()
@@ -33,6 +36,62 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+
+  // Sort the influencers based on current sort state
+  const sortedInfluencers = useMemo(() => {
+    if (!sortField || !sortDirection) {
+      return influencers
+    }
+
+    return [...influencers].sort((a, b) => {
+      let aValue: any = a[sortField]
+      let bValue: any = b[sortField]
+
+      // Handle string sorting (case insensitive)
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase()
+        bValue = bValue.toLowerCase()
+      }
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0
+      if (aValue == null) return sortDirection === 'asc' ? -1 : 1
+      if (bValue == null) return sortDirection === 'asc' ? 1 : -1
+
+      // Compare values
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [influencers, sortField, sortDirection])
+
+  // Handle column header clicks for sorting
+  const handleSort = useCallback((field: SortField) => {
+    if (sortField === field) {
+      // Cycle through: asc -> desc -> null
+      if (sortDirection === 'asc') {
+        setSortDirection('desc')
+      } else if (sortDirection === 'desc') {
+        setSortField(null)
+        setSortDirection(null)
+      } else {
+        setSortDirection('asc')
+      }
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }, [sortField, sortDirection])
+
+  // Get sort icon for column headers
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return null
+    if (sortDirection === 'asc') return <ChevronUp className="h-4 w-4" />
+    if (sortDirection === 'desc') return <ChevronDown className="h-4 w-4" />
+    return null
+  }
 
   // Reset selected IDs when influencers change
   useEffect(() => {
@@ -40,7 +99,7 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
   }, [influencers])
 
   const rowVirtualizer = useVirtualizer({
-    count: influencers.length,
+    count: sortedInfluencers.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 60,
     overscan: 10,
@@ -60,12 +119,12 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
   const handleSelectAll = useCallback(
     (checked: boolean) => {
       if (checked) {
-        setSelectedIds(influencers.map((inf) => inf.id))
+        setSelectedIds(sortedInfluencers.map((inf) => inf.id))
       } else {
         setSelectedIds([])
       }
     },
-    [influencers],
+    [sortedInfluencers],
   )
 
   const handleSelectOne = useCallback((id: string, checked: boolean) => {
@@ -154,25 +213,55 @@ export function InfluencerTable({ influencers, onDelete }: InfluencerTableProps)
           >
             <div className="flex justify-center">
               <Checkbox
-                checked={influencers.length > 0 && selectedIds.length === influencers.length}
+                checked={sortedInfluencers.length > 0 && selectedIds.length === sortedInfluencers.length}
                 onCheckedChange={handleSelectAll}
                 aria-label="Select all"
               />
             </div>
-            <div>Handle</div>
-            <div>Platform</div>
-            <div>Followers</div>
-            <div>Rate</div>
+            <button 
+              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+              onClick={() => handleSort('handle')}
+            >
+              <span>Handle</span>
+              {getSortIcon('handle')}
+            </button>
+            <button 
+              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+              onClick={() => handleSort('platform')}
+            >
+              <span>Platform</span>
+              {getSortIcon('platform')}
+            </button>
+            <button 
+              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+              onClick={() => handleSort('followers')}
+            >
+              <span>Followers</span>
+              {getSortIcon('followers')}
+            </button>
+            <button 
+              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+              onClick={() => handleSort('rate')}
+            >
+              <span>Rate</span>
+              {getSortIcon('rate')}
+            </button>
             <div>Category</div>
             <div>Tags</div>
-            <div>Engagement</div>
+            <button 
+              className="flex items-center gap-1 text-left hover:text-primary transition-colors"
+              onClick={() => handleSort('engagement_rate')}
+            >
+              <span>Engagement</span>
+              {getSortIcon('engagement_rate')}
+            </button>
             <div>Demographics</div>
           </div>
 
           {/* Virtual Content */}
           <div className="relative" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const influencer = influencers[virtualRow.index]
+              const influencer = sortedInfluencers[virtualRow.index]
               return (
                 <div
                   key={influencer.id}
