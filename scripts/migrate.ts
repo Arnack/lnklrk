@@ -105,6 +105,46 @@ async function migrate() {
     await sql`
       ALTER TABLE influencers ADD COLUMN IF NOT EXISTS tags TEXT[]
     `;
+
+    console.log('Creating reminders table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS reminders (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id),
+        title TEXT NOT NULL,
+        description TEXT,
+        expiration_date TIMESTAMP NOT NULL,
+        is_expired BOOLEAN DEFAULT false,
+        is_completed BOOLEAN DEFAULT false,
+        type TEXT NOT NULL DEFAULT 'general',
+        influencer_id UUID REFERENCES influencers(id) ON DELETE CASCADE,
+        campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+        priority TEXT NOT NULL DEFAULT 'medium',
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT now(),
+        updated_at TIMESTAMP DEFAULT now()
+      )
+    `;
+
+    console.log('Creating indexes for reminders table...');
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_reminders_user_id ON reminders(user_id)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_reminders_expiration_date ON reminders(expiration_date)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_reminders_is_expired ON reminders(is_expired)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_reminders_type ON reminders(type)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_reminders_influencer_id ON reminders(influencer_id)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_reminders_campaign_id ON reminders(campaign_id)
+    `;
     
     console.log('Migration completed successfully');
     process.exit(0);
