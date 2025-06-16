@@ -129,9 +129,12 @@ export function ReminderNotification() {
         <DropdownMenuSeparator />
         
         {reminders.length === 0 ? (
-          <div className="p-3 text-center text-sm text-muted-foreground">
-            No active reminders
-          </div>
+          <DropdownMenuItem 
+          className="cursor-pointer text-center justify-center"
+          onClick={handleViewAllReminders}
+        >
+          View all reminders
+        </DropdownMenuItem>
         ) : (
           <>
             {reminders.slice(0, 4).map((reminder) => (

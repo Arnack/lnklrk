@@ -4,10 +4,10 @@ import './globals.css'
 import { LanguageProvider } from '@/context/language-provider'
 import { AuthProvider } from '@/context/auth-provider'
 import { ThemeProvider } from '@/components/theme-provider'
-import { Navbar } from '@/components/navbar'
 import { Toaster } from 'sonner'
 import { ConditionalNavbar } from '@/components/conditional-navbar'
 const inter = Inter({ subsets: ["latin"] })
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: 'Chinny CRM',
@@ -35,6 +35,7 @@ export default function RootLayout({
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
