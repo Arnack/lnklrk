@@ -222,7 +222,7 @@ export function LoginForm() {
         {/* Left Column - Welcome Section with Solar System */}
         <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-100 dark:bg-slate-800 py-8 px-4 lg:py-0">
           {/* Welcome Text */}
-          <div className="text-center mb-4 lg:mb-6">
+          <div className="text-center mt-4 mb-0 lg:mb-6">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-4 font-mono">
               {solarSystemMode === 'solar' ? 'Chinny CRM' : 'Earth Station'}
             </h1>
@@ -234,7 +234,7 @@ export function LoginForm() {
             </p>
           </div>
 
-          <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px]">
+          <div className="relative w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] xl:w-[500px] xl:h-[500px] 2xl:w-[600px] 2xl:h-[600px]">
             {solarSystemMode === 'solar' ? (
               <>
                 {/* Central Sun */}
