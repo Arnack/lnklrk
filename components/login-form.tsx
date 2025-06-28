@@ -220,7 +220,7 @@ export function LoginForm() {
         </div>
 
         {/* Left Column - Welcome Section with Solar System */}
-        <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-100 dark:bg-slate-800 py-8 px-4 lg:py-0">
+        <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-100 dark:bg-slate-800 py-8 px-4 lg:py-0 order-2 lg:order-1">
           {/* Welcome Text */}
           <div className="text-center mt-4 mb-0 lg:mb-6">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-4 font-mono">
@@ -524,7 +524,7 @@ export function LoginForm() {
         </div>
 
         {/* Right Column - Form Section */}
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 order-1 lg:order-2">
           <div className="w-full max-w-md">
             {/* Form Header */}
             <div className="text-center mb-6 lg:mb-8">

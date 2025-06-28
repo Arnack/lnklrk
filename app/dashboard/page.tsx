@@ -7,14 +7,16 @@ import { ImportExportButtons } from "@/components/import-export-buttons"
 import { AddInfluencerForm } from "@/components/add-influencer-form"
 import { ColumnSelector, type ColumnKey, defaultColumns } from "@/components/column-selector"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import type { Influencer } from "@/types/influencer"
 import { fetchInfluencers, deleteInfluencer } from "@/lib/api"
-import { Loader2 } from "lucide-react"
+import { Loader2, Filter } from "lucide-react"
 
 export default function DashboardPage() {
   const [influencers, setInfluencers] = useState<Influencer[]>([])
   const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [showFilters, setShowFilters] = useState(false) // Hide filters by default
   
   // Initialize visible columns state
   const [visibleColumns, setVisibleColumns] = useState<Record<ColumnKey, boolean>>(() => {
@@ -93,6 +95,15 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Manage your influencers and campaigns in one place</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </Button>
           <ColumnSelector 
             visibleColumns={visibleColumns} 
             onColumnToggle={handleColumnToggle} 
@@ -102,12 +113,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <FilterBar influencers={influencers} onFilterChange={handleFilterChange} />
+      {showFilters && (
+        <FilterBar influencers={influencers} onFilterChange={handleFilterChange} />
+      )}
 
       <InfluencerTable 
         influencers={filteredInfluencers} 
         onDelete={handleDeleteInfluencers}
         visibleColumns={visibleColumns}
+        showFilters={showFilters}
       />
     </div>
   )

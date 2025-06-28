@@ -26,12 +26,13 @@ interface InfluencerTableProps {
   influencers: Influencer[]
   onDelete: (ids: string[]) => void
   visibleColumns: Record<ColumnKey, boolean>
+  showFilters?: boolean
 }
 
 type SortField = 'handle' | 'platform' | 'followers' | 'rate' | 'engagement_rate' | 'profile_link'
 type SortDirection = 'asc' | 'desc' | null
 
-export function InfluencerTable({ influencers, onDelete, visibleColumns }: InfluencerTableProps) {
+export function InfluencerTable({ influencers, onDelete, visibleColumns, showFilters = false }: InfluencerTableProps) {
   const router = useRouter()
   const parentRef = useRef<HTMLDivElement>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -224,7 +225,7 @@ export function InfluencerTable({ influencers, onDelete, visibleColumns }: Influ
         </div>
       )}
 
-      <div ref={parentRef} className="border rounded-md overflow-auto h-[calc(100vh-280px)]">
+      <div ref={parentRef} className={`border rounded-md overflow-auto ${showFilters ? 'h-[calc(100vh-280px)]' : 'h-[calc(100vh-220px)]'}`}>
         <div className="min-w-[980px]">
           {/* Header */}
           <div 
