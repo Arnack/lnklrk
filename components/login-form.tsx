@@ -12,9 +12,8 @@ import LS from "@/app/service/LS"
 
 const disclaymerVars = [
   "欧利以键盘为笔，以灵魂为墨，倾心创作",
-  "欧利瞎敲键盘，乱撒真心，居然做成了 （大概）",
-  "欧利喜欢行星轨道的非对称性，但最终做出来的却是CRM系统",
-  "Greg meant to play with keybord — but somehow made this",
+  "欧利喜欢行星轨道的非对称性",
+  "Только не кликай по Земле пжста"
 ]
 
 export function LoginForm() {
@@ -90,7 +89,7 @@ export function LoginForm() {
       
       if (formMode === 'login') {
         LS.setUserId(data?.user?.id);
-        router.push('/dashboard')
+        router.push('/mass-email')
       } else {
         // Show success message for password/email changes
         setError(null)
@@ -224,11 +223,11 @@ export function LoginForm() {
           {/* Welcome Text */}
           <div className="text-center mt-4 mb-0 lg:mb-6">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-4 font-mono">
-              {solarSystemMode === 'solar' ? 'Chinny CRM' : 'Earth Station'}
+              {solarSystemMode === 'solar' ? 'MEnRS' : 'Earth Station'}
             </h1>
             <p className="text-blue-600 dark:text-blue-400 text-sm sm:text-base lg:text-lg font-light max-w-sm px-4">
               {solarSystemMode === 'solar' 
-                ? 'Orchestrating influencer relationships with precision and clarity'
+                ? 'Mass Emails and Randoms Stuff'
                 : '🚀 Monitoring Earth\'s orbital infrastructure and satellite networks'
               }
             </p>
@@ -752,7 +751,7 @@ export function LoginForm() {
             <div className="text-center mt-4 sm:mt-6 relative z-10" onClick={handleDisclaymerClick}>
               {!disclaymerWasClicked ? (
                 <p className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider px-4">
-                  Created with ⌨️ & ❤️ by <a target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Greg</a>
+                  Created with ⌨️ & 🩸🫀 by <a target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Greg</a>
                 </p>
               ) : (
                 <p onClick={handleDisclaymerClick} className="text-xs text-gray-500 dark:text-slate-500 font-mono tracking-wider px-4">

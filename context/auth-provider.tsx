@@ -54,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         router.push('/login')
       } else if (isAuthenticated && pathname === '/login') {
         // User is authenticated but on login page, redirect to dashboard
-        router.push('/dashboard')
+        router.push('/mass-email')
       }
     }
   }, [isAuthenticated, isLoading, pathname, isPublicRoute, router])
@@ -67,11 +67,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // TODO: Validate token with backend if needed
         setUser(storedUser)
       } else {
-        setUser(null)
+        // For development, set a demo user
+        setUser({
+          id: "20b93366-6615-4318-8429-e180ad823eae",
+          email: "test@example.com",
+          name: "Test User",
+          access_token: "demo-token"
+        })
       }
     } catch (error) {
       console.error('Error checking auth status:', error)
-      setUser(null)
+      // For development, set a demo user even on error
+      setUser({
+        id: "20b93366-6615-4318-8429-e180ad823eae",
+        email: "test@example.com",
+        name: "Test User",
+        access_token: "demo-token"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -82,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await AuthService.login(credentials)
       const { user: updatedUser } = LS.getUserInfo()
       setUser(updatedUser)
-      router.push('/dashboard')
+      router.push('/mass-email')
     } catch (error) {
       console.error('Login error:', error)
       throw error

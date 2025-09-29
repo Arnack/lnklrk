@@ -142,7 +142,7 @@ export default function SettingsPage() {
     <div className="container mx-auto p-6">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => router.push('/dashboard')}>
+          <Button variant="outline" onClick={() => router.push('/mass-email')}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">Settings</h1>

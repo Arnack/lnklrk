@@ -15,7 +15,8 @@ import {
   Settings, 
   FileText,
   Target,
-  Bell
+  Bell,
+  Mail
 } from "lucide-react"
 
 const navigationItems = [
@@ -25,17 +26,23 @@ const navigationItems = [
   //   icon: LayoutDashboard,
   //   description: "Overview and analytics"
   // },
+  // {
+  //   name: "Influencers",
+  //   href: "/dashboard", // Since influencers are shown on dashboard
+  //   icon: Users,
+  //   description: "Manage influencers"
+  // },
+  // {
+  //   name: "Campaigns",
+  //   href: "/campaigns",
+  //   icon: Megaphone,
+  //   description: "Campaign management"
+  // },
   {
-    name: "Influencers",
-    href: "/dashboard", // Since influencers are shown on dashboard
-    icon: Users,
-    description: "Manage influencers"
-  },
-  {
-    name: "Campaigns",
-    href: "/campaigns",
-    icon: Megaphone,
-    description: "Campaign management"
+    name: "Mass Email",
+    href: "/mass-email",
+    icon: Mail,
+    description: "Send bulk emails"
   },
   // {
   //   name: "Reminders",
@@ -43,12 +50,12 @@ const navigationItems = [
   //   icon: Bell,
   //   description: "Manage reminders"
   // },
-  {
-    name: "Analytics",
-    href: "/analytics",
-    icon: BarChart3,
-    description: "Performance insights"
-  },
+  // {
+  //   name: "Analytics",
+  //   href: "/analytics",
+  //   icon: BarChart3,
+  //   description: "Performance insights"
+  // },
   // {
   //   name: "Reports",
   //   href: "/reports",
@@ -74,9 +81,9 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="flex items-center space-x-2">
+            <Link href="/mass-email" className="flex items-center space-x-2">
               <Target className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">Chinny CRM</span>
+              <span className="font-bold text-xl">MEnRS</span>
             </Link>
           </div>
 

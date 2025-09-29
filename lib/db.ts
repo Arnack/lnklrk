@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle } from 'drizzle-orm/neon-serverless';
 
 // Ensure this code only runs on the server side
 if (typeof window !== 'undefined') {
@@ -13,8 +13,8 @@ if (!process.env.DATABASE_URL) {
 // Create a SQL connection
 const sql = neon(process.env.DATABASE_URL);
 
-// Create a drizzle database instance
+// Create a drizzle database instance using neon-http
 export const db = drizzle(sql);
 
 // Export the raw SQL connection for direct queries if needed
-export { sql }; 
+export { sql };

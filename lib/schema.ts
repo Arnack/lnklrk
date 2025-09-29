@@ -99,6 +99,43 @@ export const influencers = pgTable('influencers', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+export const massEmailCampaigns = pgTable('mass_email_campaigns', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  name: text('name').notNull(),
+  subject: text('subject').notNull(),
+  content: text('content').notNull(),
+  templateId: text('template_id'), // Reference to email template used
+  templateVariables: jsonb('template_variables').$type<Record<string, string>>(),
+  status: text('status').notNull().default('draft'), // draft, sending, sent, failed
+  stats: jsonb('stats').$type<{
+    total: number;
+    sent: number;
+    failed: number;
+    pending: number;
+  }>(),
+  sentAt: timestamp('sent_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const massEmailRecipients = pgTable('mass_email_recipients', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  campaignId: uuid('campaign_id').references(() => massEmailCampaigns.id, { onDelete: 'cascade' }).notNull(),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  platform: text('platform'),
+  followers: integer('followers'),
+  category: text('category'),
+  tags: text('tags').array(),
+  customFields: jsonb('custom_fields').$type<Record<string, string>>(),
+  status: text('status').notNull().default('pending'), // pending, sent, failed
+  errorMessage: text('error_message'),
+  sentAt: timestamp('sent_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const reminders = pgTable('reminders', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id).notNull(), // Link to user who created the reminder
@@ -129,4 +166,4 @@ export const reminders = pgTable('reminders', {
   
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-}); 
+});

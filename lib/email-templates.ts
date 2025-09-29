@@ -222,6 +222,17 @@ export const getTemplatesByCategory = (category: EmailTemplate['category']) => {
   return emailTemplates.filter(template => template.category === category)
 }
 
+export const getTemplatesByCategories = () => {
+  const categories: Record<string, EmailTemplate[]> = {}
+  emailTemplates.forEach(template => {
+    if (!categories[template.category]) {
+      categories[template.category] = []
+    }
+    categories[template.category].push(template)
+  })
+  return categories
+}
+
 export const getTemplateById = (id: string) => {
   return emailTemplates.find(template => template.id === id)
 }

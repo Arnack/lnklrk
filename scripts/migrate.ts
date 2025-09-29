@@ -145,6 +145,65 @@ async function migrate() {
     await sql`
       CREATE INDEX IF NOT EXISTS idx_reminders_campaign_id ON reminders(campaign_id)
     `;
+
+    console.log('Creating mass_email_campaigns table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS mass_email_campaigns (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id),
+        name TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        content TEXT NOT NULL,
+        template_id TEXT,
+        template_variables JSONB,
+        status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'sending', 'sent', 'failed')),
+        stats JSONB,
+        sent_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+
+    console.log('Creating mass_email_recipients table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS mass_email_recipients (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        campaign_id UUID NOT NULL REFERENCES mass_email_campaigns(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        platform TEXT,
+        followers INTEGER,
+        category TEXT,
+        tags TEXT[],
+        custom_fields JSONB,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
+        error_message TEXT,
+        sent_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+
+    console.log('Creating indexes for mass email tables...');
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_mass_email_campaigns_user_id ON mass_email_campaigns(user_id)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_mass_email_campaigns_status ON mass_email_campaigns(status)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_mass_email_campaigns_created_at ON mass_email_campaigns(created_at)
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_mass_email_recipients_campaign_id ON mass_email_recipients(campaign_id)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_mass_email_recipients_status ON mass_email_recipients(status)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_mass_email_recipients_email ON mass_email_recipients(email)
+    `;
     
     console.log('Migration completed successfully');
     process.exit(0);

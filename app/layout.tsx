@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
-  title: 'Chinny CRM',
+  title: 'Mass Emails and randoms stuff',
   description: 'by LinkLark',
   generator: 'LinkLark',
 }
