@@ -10,6 +10,11 @@ interface Recipient {
   category?: string
   tags?: string[]
   customFields?: Record<string, string>
+  type?: 'brand' | 'creator' | 'creator_agency' | 'brand_agency'
+  tiktok?: boolean
+  instagram?: boolean
+  youtube?: boolean
+  ugc?: boolean
 }
 
 interface MassEmailCampaign {

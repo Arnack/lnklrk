@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { massEmailCampaigns, massEmailRecipients } from '@/lib/schema'
-import { eq, and } from 'drizzle-orm'
+import { sql } from '@/lib/db'
 
 // GET /api/mass-email/[id] - Get a specific campaign
 export async function GET(
@@ -11,19 +9,36 @@ export async function GET(
   try {
     const campaignId = params.id
 
-    const [campaign] = await db
-      .select()
-      .from(massEmailCampaigns)
-      .where(eq(massEmailCampaigns.id, campaignId))
+    const [campaign] = await sql`
+      SELECT * FROM mass_email_campaigns 
+      WHERE id = ${campaignId}
+    `
 
     if (!campaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
 
-    const recipients = await db
-      .select()
-      .from(massEmailRecipients)
-      .where(eq(massEmailRecipients.campaignId, campaignId))
+    const recipients = await sql`
+      SELECT 
+        id,
+        name,
+        email,
+        platform,
+        followers,
+        category,
+        tags,
+        custom_fields,
+        COALESCE(type, 'creator') as type,
+        COALESCE(tiktok, false) as tiktok,
+        COALESCE(instagram, false) as instagram,
+        COALESCE(youtube, false) as youtube,
+        COALESCE(ugc, false) as ugc,
+        status,
+        created_at,
+        updated_at
+      FROM mass_email_recipients 
+      WHERE campaign_id = ${campaignId}
+    `
 
     return NextResponse.json({ 
       campaign: {
@@ -50,18 +65,18 @@ export async function PUT(
     const body = await request.json()
     const { name, subject, content, status, stats } = body
 
-    const [updatedCampaign] = await db
-      .update(massEmailCampaigns)
-      .set({
-        name,
-        subject,
-        content,
-        status,
-        stats,
-        updatedAt: new Date()
-      })
-      .where(eq(massEmailCampaigns.id, campaignId))
-      .returning()
+    const [updatedCampaign] = await sql`
+      UPDATE mass_email_campaigns 
+      SET 
+        name = ${name},
+        subject = ${subject},
+        content = ${content},
+        status = ${status},
+        stats = ${JSON.stringify(stats)},
+        updated_at = NOW()
+      WHERE id = ${campaignId}
+      RETURNING *
+    `
 
     if (!updatedCampaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
@@ -86,14 +101,16 @@ export async function DELETE(
     const campaignId = params.id
 
     // Delete recipients first
-    await db
-      .delete(massEmailRecipients)
-      .where(eq(massEmailRecipients.campaignId, campaignId))
+    await sql`
+      DELETE FROM mass_email_recipients 
+      WHERE campaign_id = ${campaignId}
+    `
 
     // Delete campaign
-    await db
-      .delete(massEmailCampaigns)
-      .where(eq(massEmailCampaigns.id, campaignId))
+    await sql`
+      DELETE FROM mass_email_campaigns 
+      WHERE id = ${campaignId}
+    `
 
     return NextResponse.json({ success: true })
   } catch (error) {

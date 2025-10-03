@@ -129,6 +129,11 @@ export const massEmailRecipients = pgTable('mass_email_recipients', {
   category: text('category'),
   tags: text('tags').array(),
   customFields: jsonb('custom_fields').$type<Record<string, string>>(),
+  type: text('type').$type<'brand' | 'creator' | 'creator_agency' | 'brand_agency'>(),
+  tiktok: boolean('tiktok').default(false),
+  instagram: boolean('instagram').default(false),
+  youtube: boolean('youtube').default(false),
+  ugc: boolean('ugc').default(false),
   status: text('status').notNull().default('pending'), // pending, sent, failed
   errorMessage: text('error_message'),
   sentAt: timestamp('sent_at'),

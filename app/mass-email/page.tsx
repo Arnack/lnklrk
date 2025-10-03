@@ -55,6 +55,7 @@ import {
 import { toast } from "sonner"
 import { useGmail } from "@/hooks/use-gmail"
 import { useMassEmail } from "@/hooks/use-mass-email"
+import { useRecipients } from "@/hooks/use-recipients"
 import { useAuth } from "@/context/auth-provider"
 import LS from "@/app/service/LS"
 import { GmailSetupAlert } from "@/components/gmail-setup-alert"
@@ -77,6 +78,11 @@ interface Recipient {
   category?: string
   tags?: string[]
   customFields?: Record<string, string>
+  type?: 'brand' | 'creator' | 'creator_agency' | 'brand_agency'
+  tiktok?: boolean
+  instagram?: boolean
+  youtube?: boolean
+  ugc?: boolean
 }
 
 interface MassEmailCampaign {
@@ -98,7 +104,6 @@ interface MassEmailCampaign {
 
 export default function MassEmailPage() {
   const [currentCampaign, setCurrentCampaign] = useState<MassEmailCampaign | null>(null)
-  const [recipients, setRecipients] = useState<Recipient[]>([])
   const [selectedRecipients, setSelectedRecipients] = useState<Set<string>>(new Set())
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -113,6 +118,15 @@ export default function MassEmailPage() {
   })
   const [sendingProgress, setSendingProgress] = useState(0)
   const [showRecipients, setShowRecipients] = useState(false)
+  const [campaignToDelete, setCampaignToDelete] = useState<MassEmailCampaign | null>(null)
+  const [showAddRecipient, setShowAddRecipient] = useState(false)
+  const [editingRecipient, setEditingRecipient] = useState<Recipient | null>(null)
+  const [recipientToDelete, setRecipientToDelete] = useState<Recipient | null>(null)
+  const [showRecipientSelector, setShowRecipientSelector] = useState(false)
+  const [selectedRecipientsForCampaign, setSelectedRecipientsForCampaign] = useState<Set<string>>(new Set())
+  const [recipientSearchTerm, setRecipientSearchTerm] = useState("")
+  const [recipientFilterType, setRecipientFilterType] = useState<string>("all")
+  const [recipientFilterPlatform, setRecipientFilterPlatform] = useState<string>("all")
 
   const { isAuthenticated, isLoading, sendEmail } = useGmail()
   const { user, isAuthenticated: userAuthenticated, isLoading: authLoading } = useAuth()
@@ -125,68 +139,47 @@ export default function MassEmailPage() {
     sendCampaign 
   } = useMassEmail({ userId: LS.getUserId() || "20b93366-6615-4318-8429-e180ad823eae", autoFetch: !!userAuthenticated })
 
-  // Load sample recipients (in real app, this would come from API)
-  useEffect(() => {
-    const sampleRecipients: Recipient[] = [
-      {
-        id: "1",
-        name: "Sarah Johnson",
-        email: "sarah@example.com",
-        platform: "Instagram",
-        followers: 50000,
-        category: "Fashion",
-        tags: ["fashion", "lifestyle"],
-        customFields: { location: "New York", rate: "500" }
-      },
-      {
-        id: "2", 
-        name: "Mike Chen",
-        email: "mike@example.com",
-        platform: "YouTube",
-        followers: 120000,
-        category: "Tech",
-        tags: ["tech", "gaming"],
-        customFields: { location: "San Francisco", rate: "800" }
-      },
-      {
-        id: "3",
-        name: "Emma Wilson",
-        email: "emma@example.com", 
-        platform: "TikTok",
-        followers: 200000,
-        category: "Beauty",
-        tags: ["beauty", "skincare"],
-        customFields: { location: "Los Angeles", rate: "1200" }
-      },
-      {
-        id: "4",
-        name: "David Rodriguez",
-        email: "david@example.com",
-        platform: "Instagram",
-        followers: 75000,
-        category: "Fitness",
-        tags: ["fitness", "health"],
-        customFields: { location: "Miami", rate: "600" }
-      },
-      {
-        id: "5",
-        name: "Lisa Park",
-        email: "lisa@example.com",
-        platform: "YouTube",
-        followers: 300000,
-        category: "Food",
-        tags: ["food", "cooking"],
-        customFields: { location: "Seattle", rate: "1500" }
-      }
-    ]
-    setRecipients(sampleRecipients)
-  }, [])
+  const {
+    recipients,
+    isLoading: recipientsLoading,
+    createRecipient,
+    updateRecipient,
+    deleteRecipient: deleteRecipientFromAPI
+  } = useRecipients({ userId: LS.getUserId() || "20b93366-6615-4318-8429-e180ad823eae", autoFetch: !!userAuthenticated })
+
+  // Form state for adding/editing recipients
+  const [recipientForm, setRecipientForm] = useState({
+    name: "",
+    email: "",
+    platform: "",
+    followers: "",
+    category: "",
+    tags: "",
+    type: "creator" as 'brand' | 'creator' | 'creator_agency' | 'brand_agency',
+    tiktok: false,
+    instagram: false,
+    youtube: false,
+    ugc: false,
+    customFields: {} as Record<string, string>
+  })
 
   const filteredRecipients = recipients.filter(recipient => {
     const matchesSearch = recipient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          recipient.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = filterCategory === "all" || recipient.category === filterCategory
     return matchesSearch && matchesCategory
+  })
+
+  const filteredRecipientsForSelector = recipients.filter(recipient => {
+    const matchesSearch = recipient.name.toLowerCase().includes(recipientSearchTerm.toLowerCase()) ||
+                         recipient.email.toLowerCase().includes(recipientSearchTerm.toLowerCase())
+    const matchesType = recipientFilterType === "all" || recipient.type === recipientFilterType
+    const matchesPlatform = recipientFilterPlatform === "all" || 
+      (recipientFilterPlatform === "tiktok" && recipient.tiktok) ||
+      (recipientFilterPlatform === "instagram" && recipient.instagram) ||
+      (recipientFilterPlatform === "youtube" && recipient.youtube) ||
+      (recipientFilterPlatform === "ugc" && recipient.ugc)
+    return matchesSearch && matchesType && matchesPlatform
   })
 
   const categories = Array.from(new Set(recipients.map(r => r.category).filter(Boolean))) as string[]
@@ -306,6 +299,233 @@ export default function MassEmailPage() {
       console.error("Error sending campaign:", error)
       setIsSending(false)
       setSendingProgress(0)
+    }
+  }
+
+  const handleDeleteCampaign = async (campaign: MassEmailCampaign) => {
+    try {
+      await deleteCampaign(campaign.id)
+      setCampaignToDelete(null)
+    } catch (error) {
+      console.error("Error deleting campaign:", error)
+    }
+  }
+
+  const handleAddRecipient = async () => {
+    if (!recipientForm.name.trim() || !recipientForm.email.trim()) {
+      toast.error("Please fill in name and email")
+      return
+    }
+
+    try {
+      // Use current campaign ID if available, otherwise use first campaign
+      const campaignId = currentCampaign?.id || campaigns[0]?.id
+      
+      if (!campaignId) {
+        toast.error("No campaign available. Please create a campaign first.")
+        return
+      }
+      
+      await createRecipient({
+        campaignId,
+        name: recipientForm.name,
+        email: recipientForm.email,
+        platform: recipientForm.platform || undefined,
+        followers: recipientForm.followers ? parseInt(recipientForm.followers) : undefined,
+        category: recipientForm.category || undefined,
+        tags: recipientForm.tags ? recipientForm.tags.split(',').map(t => t.trim()) : [],
+        type: recipientForm.type,
+        tiktok: recipientForm.tiktok,
+        instagram: recipientForm.instagram,
+        youtube: recipientForm.youtube,
+        ugc: recipientForm.ugc,
+        customFields: recipientForm.customFields
+      })
+
+      // Reset form
+      setRecipientForm({
+        name: "",
+        email: "",
+        platform: "",
+        followers: "",
+        category: "",
+        tags: "",
+        type: "creator",
+        tiktok: false,
+        instagram: false,
+        youtube: false,
+        ugc: false,
+        customFields: {}
+      })
+      setShowAddRecipient(false)
+      
+      // Refresh the current campaign data if we're in campaign view
+      if (currentCampaign) {
+        await refreshCurrentCampaign()
+      }
+    } catch (error) {
+      console.error("Error adding recipient:", error)
+    }
+  }
+
+  const handleEditRecipient = async () => {
+    if (!editingRecipient || !recipientForm.name.trim() || !recipientForm.email.trim()) {
+      toast.error("Please fill in name and email")
+      return
+    }
+
+    try {
+      await updateRecipient(editingRecipient.id, {
+        name: recipientForm.name,
+        email: recipientForm.email,
+        platform: recipientForm.platform || undefined,
+        followers: recipientForm.followers ? parseInt(recipientForm.followers) : undefined,
+        category: recipientForm.category || undefined,
+        tags: recipientForm.tags ? recipientForm.tags.split(',').map(t => t.trim()) : [],
+        type: recipientForm.type,
+        tiktok: recipientForm.tiktok,
+        instagram: recipientForm.instagram,
+        youtube: recipientForm.youtube,
+        ugc: recipientForm.ugc,
+        customFields: recipientForm.customFields
+      })
+
+      setEditingRecipient(null)
+      setRecipientForm({
+        name: "",
+        email: "",
+        platform: "",
+        followers: "",
+        category: "",
+        tags: "",
+        type: "creator",
+        tiktok: false,
+        instagram: false,
+        youtube: false,
+        ugc: false,
+        customFields: {}
+      })
+      
+      // Refresh the current campaign data if we're in campaign view
+      if (currentCampaign) {
+        await refreshCurrentCampaign()
+      }
+    } catch (error) {
+      console.error("Error updating recipient:", error)
+    }
+  }
+
+  const handleDeleteRecipient = async () => {
+    if (!recipientToDelete) return
+
+    try {
+      await deleteRecipientFromAPI(recipientToDelete.id)
+      setRecipientToDelete(null)
+      
+      // Refresh the current campaign data if we're in campaign view
+      if (currentCampaign) {
+        await refreshCurrentCampaign()
+      }
+    } catch (error) {
+      console.error("Error deleting recipient:", error)
+    }
+  }
+
+  const openEditRecipient = (recipient: Recipient) => {
+    setEditingRecipient(recipient)
+    setRecipientForm({
+      name: recipient.name,
+      email: recipient.email,
+      platform: recipient.platform || "",
+      followers: recipient.followers?.toString() || "",
+      category: recipient.category || "",
+      tags: recipient.tags?.join(', ') || "",
+      type: recipient.type || "creator",
+      tiktok: recipient.tiktok || false,
+      instagram: recipient.instagram || false,
+      youtube: recipient.youtube || false,
+      ugc: recipient.ugc || false,
+      customFields: recipient.customFields || {}
+    })
+  }
+
+  const refreshCurrentCampaign = async () => {
+    if (!currentCampaign) return
+    
+    try {
+      const response = await fetch(`/api/mass-email/${currentCampaign.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentCampaign(data.campaign)
+      }
+    } catch (error) {
+      console.error("Error refreshing campaign:", error)
+    }
+  }
+
+  const handleRecipientSelectorToggle = (recipientId: string) => {
+    const newSelected = new Set(selectedRecipientsForCampaign)
+    if (newSelected.has(recipientId)) {
+      newSelected.delete(recipientId)
+    } else {
+      newSelected.add(recipientId)
+    }
+    setSelectedRecipientsForCampaign(newSelected)
+  }
+
+  const handleSelectAllRecipients = () => {
+    if (selectedRecipientsForCampaign.size === filteredRecipientsForSelector.length) {
+      setSelectedRecipientsForCampaign(new Set())
+    } else {
+      setSelectedRecipientsForCampaign(new Set(filteredRecipientsForSelector.map(r => r.id)))
+    }
+  }
+
+  const handleAddSelectedRecipientsToCampaign = async () => {
+    if (selectedRecipientsForCampaign.size === 0) {
+      toast.error("Please select recipients to add")
+      return
+    }
+
+    try {
+      const selectedRecipients = recipients.filter(r => selectedRecipientsForCampaign.has(r.id))
+      
+      if (currentCampaign) {
+        // Adding to existing campaign - create new recipient records
+        for (const recipient of selectedRecipients) {
+          await createRecipient({
+            campaignId: currentCampaign.id,
+            name: recipient.name,
+            email: recipient.email,
+            platform: recipient.platform,
+            followers: recipient.followers,
+            category: recipient.category,
+            tags: recipient.tags,
+            type: recipient.type,
+            tiktok: recipient.tiktok,
+            instagram: recipient.instagram,
+            youtube: recipient.youtube,
+            ugc: recipient.ugc,
+            customFields: recipient.customFields
+          })
+        }
+        
+        // Refresh campaign data
+        await refreshCurrentCampaign()
+        toast.success(`Added ${selectedRecipients.length} recipients to campaign`)
+      } else {
+        // Adding to campaign creation - just add to selected recipients
+        const newSelectedRecipients = new Set(selectedRecipients.map(r => r.id))
+        setSelectedRecipients(newSelectedRecipients)
+        toast.success(`Selected ${selectedRecipients.length} recipients for new campaign`)
+      }
+
+      // Clear selection and close modal
+      setSelectedRecipientsForCampaign(new Set())
+      setShowRecipientSelector(false)
+    } catch (error) {
+      console.error("Error adding recipients to campaign:", error)
+      toast.error("Failed to add recipients to campaign")
     }
   }
 
@@ -480,6 +700,15 @@ export default function MassEmailPage() {
                           Send
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCampaignToDelete(campaign)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                   
@@ -527,6 +756,14 @@ export default function MassEmailPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium">Select Recipients</h3>
                 <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowRecipientSelector(true)}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Browse All
+                  </Button>
                   <Button variant="outline" size="sm" onClick={handleSelectAll}>
                     {selectedRecipients.size === filteredRecipients.length ? (
                       <>
@@ -791,16 +1028,39 @@ export default function MassEmailPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-medium">Recipients:</h4>
-                <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Recipients ({currentCampaign.recipients?.length || 0}):</h4>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowRecipientSelector(true)}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Select Recipients
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowAddRecipient(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New
+                    </Button>
+                  </div>
+                </div>
+                <div className="border rounded-lg max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Platform</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Platforms</TableHead>
+                        <TableHead>Followers</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -808,14 +1068,44 @@ export default function MassEmailPage() {
                         <TableRow key={recipient.id}>
                           <TableCell className="font-medium">{recipient.name}</TableCell>
                           <TableCell>{recipient.email}</TableCell>
-                          <TableCell>{recipient.platform}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{recipient.type || 'N/A'}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {recipient.tiktok && <Badge variant="secondary" className="text-xs">TikTok</Badge>}
+                              {recipient.instagram && <Badge variant="secondary" className="text-xs">Instagram</Badge>}
+                              {recipient.youtube && <Badge variant="secondary" className="text-xs">YouTube</Badge>}
+                              {recipient.ugc && <Badge variant="secondary" className="text-xs">UGC</Badge>}
+                            </div>
+                          </TableCell>
+                          <TableCell>{recipient.followers?.toLocaleString() || 'N/A'}</TableCell>
                           <TableCell>
                             <Badge variant="outline">Pending</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => openEditRecipient(recipient)}
+                              >
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setRecipientToDelete(recipient)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       )) || (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          <TableCell colSpan={7} className="text-center text-muted-foreground">
                             No recipients found
                           </TableCell>
                         </TableRow>
@@ -856,7 +1146,7 @@ export default function MassEmailPage() {
               <div className="text-sm text-muted-foreground">
                 {recipients.length} total recipients
               </div>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setShowAddRecipient(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Recipient
               </Button>
@@ -868,7 +1158,8 @@ export default function MassEmailPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Platform</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Platforms</TableHead>
                     <TableHead>Followers</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Actions</TableHead>
@@ -879,15 +1170,39 @@ export default function MassEmailPage() {
                     <TableRow key={recipient.id}>
                       <TableCell className="font-medium">{recipient.name}</TableCell>
                       <TableCell>{recipient.email}</TableCell>
-                      <TableCell>{recipient.platform}</TableCell>
-                      <TableCell>{recipient.followers?.toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{recipient.category}</Badge>
+                        <Badge variant="outline">{recipient.type || 'N/A'}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          {recipient.tiktok && <Badge variant="secondary" className="text-xs">TikTok</Badge>}
+                          {recipient.instagram && <Badge variant="secondary" className="text-xs">Instagram</Badge>}
+                          {recipient.youtube && <Badge variant="secondary" className="text-xs">YouTube</Badge>}
+                          {recipient.ugc && <Badge variant="secondary" className="text-xs">UGC</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell>{recipient.followers?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{recipient.category || 'N/A'}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => openEditRecipient(recipient)}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setRecipientToDelete(recipient)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -899,6 +1214,383 @@ export default function MassEmailPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRecipients(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Campaign Confirmation Dialog */}
+      <Dialog open={!!campaignToDelete} onOpenChange={() => setCampaignToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Campaign</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{campaignToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCampaignToDelete(null)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => campaignToDelete && handleDeleteCampaign(campaignToDelete)}
+            >
+              Delete Campaign
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Recipient Dialog */}
+      <Dialog open={showAddRecipient || !!editingRecipient} onOpenChange={() => {
+        setShowAddRecipient(false)
+        setEditingRecipient(null)
+        setRecipientForm({
+          name: "",
+          email: "",
+          platform: "",
+          followers: "",
+          category: "",
+          tags: "",
+          type: "creator",
+          tiktok: false,
+          instagram: false,
+          youtube: false,
+          ugc: false,
+          customFields: {}
+        })
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingRecipient ? 'Edit Recipient' : 'Add Recipient'}</DialogTitle>
+            <DialogDescription>
+              {editingRecipient ? 'Update recipient information' : 'Add a new email recipient'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  value={recipientForm.name}
+                  onChange={(e) => setRecipientForm({ ...recipientForm, name: e.target.value })}
+                  placeholder="Recipient name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={recipientForm.email}
+                  onChange={(e) => setRecipientForm({ ...recipientForm, email: e.target.value })}
+                  placeholder="recipient@example.com"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="platform">Platform</Label>
+                <Input
+                  id="platform"
+                  value={recipientForm.platform}
+                  onChange={(e) => setRecipientForm({ ...recipientForm, platform: e.target.value })}
+                  placeholder="e.g., Instagram, YouTube"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="followers">Followers</Label>
+                <Input
+                  id="followers"
+                  type="number"
+                  value={recipientForm.followers}
+                  onChange={(e) => setRecipientForm({ ...recipientForm, followers: e.target.value })}
+                  placeholder="100000"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Input
+                  id="category"
+                  value={recipientForm.category}
+                  onChange={(e) => setRecipientForm({ ...recipientForm, category: e.target.value })}
+                  placeholder="e.g., Fashion, Tech"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type">Type</Label>
+                <Select value={recipientForm.type} onValueChange={(value: 'brand' | 'creator' | 'creator_agency' | 'brand_agency') => 
+                  setRecipientForm({ ...recipientForm, type: value })
+                }>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="brand">Brand</SelectItem>
+                    <SelectItem value="creator">Creator</SelectItem>
+                    <SelectItem value="creator_agency">Creator Agency</SelectItem>
+                    <SelectItem value="brand_agency">Brand Agency</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <Input
+                id="tags"
+                value={recipientForm.tags}
+                onChange={(e) => setRecipientForm({ ...recipientForm, tags: e.target.value })}
+                placeholder="fashion, lifestyle, beauty (comma separated)"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label>Platforms</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="tiktok"
+                    checked={recipientForm.tiktok}
+                    onCheckedChange={(checked) => setRecipientForm({ ...recipientForm, tiktok: !!checked })}
+                  />
+                  <Label htmlFor="tiktok">TikTok</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="instagram"
+                    checked={recipientForm.instagram}
+                    onCheckedChange={(checked) => setRecipientForm({ ...recipientForm, instagram: !!checked })}
+                  />
+                  <Label htmlFor="instagram">Instagram</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="youtube"
+                    checked={recipientForm.youtube}
+                    onCheckedChange={(checked) => setRecipientForm({ ...recipientForm, youtube: !!checked })}
+                  />
+                  <Label htmlFor="youtube">YouTube</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="ugc"
+                    checked={recipientForm.ugc}
+                    onCheckedChange={(checked) => setRecipientForm({ ...recipientForm, ugc: !!checked })}
+                  />
+                  <Label htmlFor="ugc">UGC</Label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowAddRecipient(false)
+              setEditingRecipient(null)
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={editingRecipient ? handleEditRecipient : handleAddRecipient}
+              disabled={!recipientForm.name.trim() || !recipientForm.email.trim()}
+            >
+              {editingRecipient ? 'Update Recipient' : 'Add Recipient'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Recipient Confirmation Dialog */}
+      <Dialog open={!!recipientToDelete} onOpenChange={() => setRecipientToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Recipient</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{recipientToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRecipientToDelete(null)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteRecipient}
+            >
+              Delete Recipient
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recipient Selector Modal */}
+      <Dialog open={showRecipientSelector} onOpenChange={() => {
+        setShowRecipientSelector(false)
+        setSelectedRecipientsForCampaign(new Set())
+        setRecipientSearchTerm("")
+        setRecipientFilterType("all")
+        setRecipientFilterPlatform("all")
+      }}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {currentCampaign ? `Select Recipients for "${currentCampaign.name}"` : 'Select Recipients for New Campaign'}
+            </DialogTitle>
+            <DialogDescription>
+              {currentCampaign 
+                ? `Choose recipients to add to "${currentCampaign.name}". You can search and filter to find the right recipients.`
+                : 'Choose recipients for your new campaign. You can search and filter to find the right recipients.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Search and Filters */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search recipients..."
+                    value={recipientSearchTerm}
+                    onChange={(e) => setRecipientSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <Select value={recipientFilterType} onValueChange={setRecipientFilterType}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="brand">Brand</SelectItem>
+                  <SelectItem value="creator">Creator</SelectItem>
+                  <SelectItem value="creator_agency">Creator Agency</SelectItem>
+                  <SelectItem value="brand_agency">Brand Agency</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={recipientFilterPlatform} onValueChange={setRecipientFilterPlatform}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Platforms</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                  <SelectItem value="ugc">UGC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Selection Summary */}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {selectedRecipientsForCampaign.size} of {filteredRecipientsForSelector.length} recipients selected
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleSelectAllRecipients}>
+                  {selectedRecipientsForCampaign.size === filteredRecipientsForSelector.length ? (
+                    <>
+                      <Square className="h-4 w-4 mr-2" />
+                      Deselect All
+                    </>
+                  ) : (
+                    <>
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Select All
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Recipients List */}
+            <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedRecipientsForCampaign.size === filteredRecipientsForSelector.length && filteredRecipientsForSelector.length > 0}
+                        onCheckedChange={handleSelectAllRecipients}
+                      />
+                    </TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Platforms</TableHead>
+                    <TableHead>Followers</TableHead>
+                    <TableHead>Category</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRecipientsForSelector.map((recipient) => (
+                    <TableRow key={recipient.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedRecipientsForCampaign.has(recipient.id)}
+                          onCheckedChange={() => handleRecipientSelectorToggle(recipient.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{recipient.name}</TableCell>
+                      <TableCell>{recipient.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{recipient.type || 'N/A'}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {recipient.tiktok && <Badge variant="secondary" className="text-xs">TikTok</Badge>}
+                          {recipient.instagram && <Badge variant="secondary" className="text-xs">Instagram</Badge>}
+                          {recipient.youtube && <Badge variant="secondary" className="text-xs">YouTube</Badge>}
+                          {recipient.ugc && <Badge variant="secondary" className="text-xs">UGC</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell>{recipient.followers?.toLocaleString() || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{recipient.category || 'N/A'}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {filteredRecipientsForSelector.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <div>No recipients found</div>
+                <p className="text-sm mt-2">Try adjusting your search or filters</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowRecipientSelector(false)
+              setSelectedRecipientsForCampaign(new Set())
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddSelectedRecipientsToCampaign}
+              disabled={selectedRecipientsForCampaign.size === 0}
+            >
+              {currentCampaign 
+                ? `Add ${selectedRecipientsForCampaign.size} Recipient${selectedRecipientsForCampaign.size !== 1 ? 's' : ''} to Campaign`
+                : `Select ${selectedRecipientsForCampaign.size} Recipient${selectedRecipientsForCampaign.size !== 1 ? 's' : ''} for New Campaign`
+              }
             </Button>
           </DialogFooter>
         </DialogContent>
